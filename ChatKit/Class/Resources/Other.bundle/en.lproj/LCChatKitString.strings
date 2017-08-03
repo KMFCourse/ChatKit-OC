@@ -48,8 +48,8 @@
 "call" = "call";
 "unknownMessage" = "Unsupported message, please update your APP";
 "unknownMessageType" = "Unsupported message type";
-"SingleWelcomeMessage" = "Hello!";
-"GroupWelcomeMessage" = "Hello!";
+"SingleWelcomeMessage" = "";
+"GroupWelcomeMessage" = "";
 "GroupWelcomeMessageWithNickName" = "Hello! I am ";
 "SingleConversation" = "single chat";
 "GroupConversation" = "group chat";
