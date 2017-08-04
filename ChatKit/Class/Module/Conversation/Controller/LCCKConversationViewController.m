@@ -669,7 +669,7 @@ NSString *const LCCKConversationViewControllerErrorDomain = @"LCCKConversationVi
             if (userName.length > 0 && (conversationType == LCCKConversationTypeGroup)) {
                 welcomeMessage = [NSString stringWithFormat:@"%@%@", LCCKLocalizedStrings(@"GroupWelcomeMessageWithNickName"), userName];
             }
-            [self sendTextMessage:welcomeMessage];
+//            [self sendTextMessage:welcomeMessage];
         }];
     }
 }
