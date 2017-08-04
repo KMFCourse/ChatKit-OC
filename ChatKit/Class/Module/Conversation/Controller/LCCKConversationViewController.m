@@ -169,6 +169,9 @@ NSString *const LCCKConversationViewControllerErrorDomain = @"LCCKConversationVi
 }
 
 #pragma mark - Life Cycle
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 - (void)setup {
     self.allowScrollToBottom = YES;
@@ -221,6 +224,10 @@ NSString *const LCCKConversationViewControllerErrorDomain = @"LCCKConversationVi
     [[LCCKUserSystemService sharedInstance] fetchCurrentUserInBackground:^(id<LCCKUserDelegate> user, NSError *error) {
         self.user = user;
     }];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userWillSendMsgWithoutPower) name:LCCKNotificationRecordNoPower object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(recieveNewMsgForLengthOut) name:LCCKNotificationTextLengthOut object:nil];
+
     [self.chatViewModel setDefaultBackgroundImage];
     self.navigationItem.title = LCCKLocalizedStrings(@"Chat");//@"聊天";
     !self.viewDidLoadBlock ?: self.viewDidLoadBlock(self);
@@ -409,6 +416,32 @@ NSString *const LCCKConversationViewControllerErrorDomain = @"LCCKConversationVi
                                      userInfo:nil];
     }
 }
+
+#pragma mark - Notification
+- (void)userWillSendMsgWithoutPower {
+    //FIXME:提醒用户
+//    [self showWarning:@"需要开启麦克风权限"];
+}
+
+- (void)recieveNewMsgForOutLength {
+    //FIXME:提醒用户
+//    [self showWarning:@"每次输入最多1000字~"];
+}
+
+- (void)showWaring:(NSString *)message {
+    LCCKAlertController *alert = [LCCKAlertController
+                                  alertControllerWithTitle:nil
+                                  message:message
+                                  preferredStyle:LCCKAlertControllerStyleAlert];
+    NSString *cancelActionTitle = LCCKLocalizedStrings(@"ok");
+    LCCKAlertAction *cancelAction = [LCCKAlertAction
+                                     actionWithTitle:cancelActionTitle
+                                     style:LCCKAlertActionStyleDefault
+                                     handler:^(LCCKAlertAction * action) {}];
+    [alert addAction:cancelAction];
+    [alert showWithSender:nil controller:self animated:YES completion:NULL];
+}
+
 
 #pragma mark - UI init
 
