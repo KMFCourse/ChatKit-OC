@@ -17,9 +17,9 @@
 
 #import "UIImageView+LCCKExtension.h"
 
-static CGFloat LCCKImageSize = 45;
-static CGFloat LCCKVerticalSpacing = 8;
-static CGFloat LCCKHorizontalSpacing = 10;
+static CGFloat LCCKImageSize = 40;
+static CGFloat LCCKVerticalSpacing = 20;
+static CGFloat LCCKHorizontalSpacing = 16;
 static CGFloat LCCKTimestampeLabelWidth = 100;
 static CGFloat LCCKAutoResizingDefaultScreenWidth = 320;
 static CGFloat LCCKNameLabelHeightProportion = 3.0 / 5;
@@ -28,7 +28,7 @@ static CGFloat LCCKMessageLabelHeight;
 static CGFloat LCCKLittleBadgeSize = 10;
 static CGFloat LCCKRemindMuteSize = 18;
 
-CGFloat const LCCKConversationListCellDefaultHeight = 61; //LCCKImageSize + LCCKVerticalSpacing * 2;
+CGFloat const LCCKConversationListCellDefaultHeight = 80; //LCCKImageSize + LCCKVerticalSpacing * 2;
 
 @interface LCCKConversationListCell ()
 
@@ -117,7 +117,7 @@ CGFloat const LCCKConversationListCellDefaultHeight = 61; //LCCKImageSize + LCCK
 
 - (UILabel *)nameLabel {
     if (_nameLabel == nil) {
-        UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(_avatarImageView.frame) + LCCKHorizontalSpacing, CGRectGetMinY(_avatarImageView.frame), CGRectGetMinX(_timestampLabel.frame) - LCCKHorizontalSpacing * 3 - LCCKImageSize, LCCKNameLabelHeight)];
+        UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(_avatarImageView.frame) + LCCKHorizontalSpacing, CGRectGetMinY(_avatarImageView.frame), CGRectGetMinX(_timestampLabel.frame) - LCCKHorizontalSpacing * 2 - LCCKImageSize, LCCKNameLabelHeight)];
         nameLabel.font = [UIFont systemFontOfSize:17];
         nameLabel.textColor = [[LCCKSettingService sharedInstance] defaultThemeColorForKey:@"TableView-CellTitle"];
         nameLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
