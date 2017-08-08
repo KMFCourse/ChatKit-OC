@@ -18,7 +18,7 @@
 #import "Masonry.h"
 #endif
 
-#define kLCCKTopLineBackgroundColor [UIColor colorWithRed:184/255.0f green:184/255.0f blue:184/255.0f alpha:1.0f]
+#define kLCCKTopLineBackgroundColor  [UIColor colorWithRed:219/255.0 green:219/255.0 blue:219/255.0 alpha:1.0f]
 
 @interface LCCKChatMoreView ()<UIScrollViewDelegate>
 

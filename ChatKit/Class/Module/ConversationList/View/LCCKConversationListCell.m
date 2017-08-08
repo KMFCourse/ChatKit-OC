@@ -26,7 +26,7 @@ static CGFloat LCCKNameLabelHeightProportion = 3.0 / 5;
 static CGFloat LCCKNameLabelHeight;
 static CGFloat LCCKMessageLabelHeight;
 static CGFloat LCCKLittleBadgeSize = 8;
-static CGFloat LCCKRemindMuteSize = 18;
+static CGFloat LCCKRemindMuteSize = 20;
 
 CGFloat const LCCKConversationListCellDefaultHeight = 80; //LCCKImageSize + LCCKVerticalSpacing * 2;
 
@@ -105,8 +105,8 @@ CGFloat const LCCKConversationListCellDefaultHeight = 80; //LCCKImageSize + LCCK
 
 - (UILabel *)timestampLabel {
     if (_timestampLabel == nil) {
-        UILabel *timestampLabel = [[UILabel alloc] initWithFrame:CGRectMake(LCCKAutoResizingDefaultScreenWidth - LCCKHorizontalSpacing - LCCKTimestampeLabelWidth, CGRectGetMinY(_avatarImageView.frame), LCCKTimestampeLabelWidth, LCCKNameLabelHeight)];
-        timestampLabel.font = [UIFont systemFontOfSize:13];
+        UILabel *timestampLabel = [[UILabel alloc] initWithFrame:CGRectMake(LCCKAutoResizingDefaultScreenWidth - LCCKHorizontalSpacing - LCCKTimestampeLabelWidth, CGRectGetMinY(_avatarImageView.frame), LCCKTimestampeLabelWidth, 13)];
+        timestampLabel.font = [UIFont systemFontOfSize:12];
         timestampLabel.textAlignment = NSTextAlignmentRight;
         timestampLabel.textColor = [[LCCKSettingService sharedInstance] defaultThemeColorForKey:@"TableView-CellMinor"];
         timestampLabel.autoresizingMask =  UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin;
@@ -117,8 +117,8 @@ CGFloat const LCCKConversationListCellDefaultHeight = 80; //LCCKImageSize + LCCK
 
 - (UILabel *)nameLabel {
     if (_nameLabel == nil) {
-        UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(_avatarImageView.frame) + LCCKHorizontalSpacing, CGRectGetMinY(_avatarImageView.frame), CGRectGetMinX(_timestampLabel.frame) - LCCKHorizontalSpacing * 2 - LCCKImageSize, LCCKNameLabelHeight)];
-        nameLabel.font = [UIFont systemFontOfSize:17];
+        UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(_avatarImageView.frame) + LCCKHorizontalSpacing, CGRectGetMinY(_avatarImageView.frame), CGRectGetMinX(_timestampLabel.frame) - LCCKHorizontalSpacing * 2 - LCCKImageSize, 16)];
+        nameLabel.font = [UIFont systemFontOfSize:16];
         nameLabel.textColor = [[LCCKSettingService sharedInstance] defaultThemeColorForKey:@"TableView-CellTitle"];
         nameLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         _nameLabel = nameLabel;
@@ -128,7 +128,7 @@ CGFloat const LCCKConversationListCellDefaultHeight = 80; //LCCKImageSize + LCCK
 
 - (UILabel *)messageTextLabel {
     if (_messageTextLabel == nil) {
-        UILabel *messageTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMinX(_nameLabel.frame), CGRectGetMaxY(_nameLabel.frame), LCCKAutoResizingDefaultScreenWidth - 4 * LCCKHorizontalSpacing - LCCKImageSize - LCCKRemindMuteSize, LCCKMessageLabelHeight)];
+        UILabel *messageTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMinX(_nameLabel.frame), CGRectGetMaxY(_nameLabel.frame)+10, LCCKAutoResizingDefaultScreenWidth - 4 * LCCKHorizontalSpacing - LCCKImageSize - LCCKRemindMuteSize, 13)];
         messageTextLabel.backgroundColor = [UIColor clearColor];
         messageTextLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         messageTextLabel.textColor = [[LCCKSettingService sharedInstance] defaultThemeColorForKey:@"TableView-CellDetail"];
@@ -140,7 +140,7 @@ CGFloat const LCCKConversationListCellDefaultHeight = 80; //LCCKImageSize + LCCK
 - (UIButton *)remindMuteImageView {
     if (_remindMuteImageView == nil) {
         UIButton *remindMuteImageView = [UIButton buttonWithType:UIButtonTypeCustom];
-        remindMuteImageView.frame = CGRectMake(CGRectGetMaxX(_messageTextLabel.frame) + LCCKHorizontalSpacing, CGRectGetMinY(_messageTextLabel.frame), LCCKRemindMuteSize, LCCKRemindMuteSize);
+        remindMuteImageView.frame = CGRectMake(CGRectGetMaxX(_messageTextLabel.frame) + LCCKHorizontalSpacing, CGRectGetMinY(_messageTextLabel.frame)-7, LCCKRemindMuteSize, LCCKRemindMuteSize);
         NSString *remindMuteImageName = @"Connectkeyboad_banner_mute";
 //        remindMuteImageView.imageEdgeInsets = UIEdgeInsetsMake(2.5, 2.5, 2.5, 2.5);
         UIImage *remindMuteImage = [UIImage lcck_imageNamed:remindMuteImageName bundleName:@"Other" bundleForClass:[LCChatKit class]];
