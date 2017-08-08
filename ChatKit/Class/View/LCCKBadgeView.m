@@ -163,7 +163,7 @@ static BOOL LCCKBadgeViewIsUIKitFlatMode(void)
             newFrame.origin.y = -viewHeight / 2.0f;
             break;
         case LCCKBadgeViewAlignmentTopRight:
-            newFrame.origin.x = superviewWidth - (viewWidth / 2.0f);
+            newFrame.origin.x = superviewWidth - (viewWidth * 0.9f);
             newFrame.origin.y = -viewHeight / 2.0f;
             break;
         case LCCKBadgeViewAlignmentTopCenter:

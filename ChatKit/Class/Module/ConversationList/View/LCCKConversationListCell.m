@@ -25,7 +25,7 @@ static CGFloat LCCKAutoResizingDefaultScreenWidth = 320;
 static CGFloat LCCKNameLabelHeightProportion = 3.0 / 5;
 static CGFloat LCCKNameLabelHeight;
 static CGFloat LCCKMessageLabelHeight;
-static CGFloat LCCKLittleBadgeSize = 10;
+static CGFloat LCCKLittleBadgeSize = 8;
 static CGFloat LCCKRemindMuteSize = 18;
 
 CGFloat const LCCKConversationListCellDefaultHeight = 80; //LCCKImageSize + LCCKVerticalSpacing * 2;
@@ -158,6 +158,7 @@ CGFloat const LCCKConversationListCellDefaultHeight = 80; //LCCKImageSize + LCCK
                                                                alignment:LCCKBadgeViewAlignmentTopRight];
         badgeView.badgeBackgroundColor = self.conversationListUnreadBackgroundColor;
         badgeView.badgeTextColor = self.conversationListUnreadTextColor;
+        badgeView.badgeTextFont = [UIFont systemFontOfSize:10];
         [self.avatarImageView addSubview:(_badgeView = badgeView)];
         [self.avatarImageView bringSubviewToFront:_badgeView];
     }
