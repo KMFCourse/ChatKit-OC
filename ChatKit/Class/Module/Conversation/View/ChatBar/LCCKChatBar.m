@@ -195,10 +195,9 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
         }
         return YES;
     } else if ([text isEqualToString:@"@"]) {
-        //关闭@功能
-//        if ([self.delegate respondsToSelector:@selector(didInputAtSign:)]) {
-//            [self.delegate didInputAtSign:self];
-//        }
+        if ([self.delegate respondsToSelector:@selector(didInputAtSign:)]) {
+            [self.delegate didInputAtSign:self];
+        }
         return YES;
     }
     return YES;
