@@ -41,16 +41,23 @@
 }
 
 - (void)setup {
+    // 圆角
     LCCKAvatarImageViewCornerRadiusBlock avatarImageViewCornerRadiusBlock = [LCChatKit sharedInstance].avatarImageViewCornerRadiusBlock;
     if (avatarImageViewCornerRadiusBlock) {
-        CGFloat avatarImageViewCornerRadius = avatarImageViewCornerRadiusBlock(self.avatarImageView.frame.size);
-        self.avatarImageView.lcck_cornerRadius = avatarImageViewCornerRadius;
+        CGSize avatarImageViewSize = _avatarImageView.frame.size;
+        CGFloat avatarImageViewCornerRadius = avatarImageViewCornerRadiusBlock(avatarImageViewSize);
+        _avatarImageView.layer.cornerRadius = avatarImageViewCornerRadius;
+        _avatarImageView.clipsToBounds = YES;
     }
+    
+    // 设置正常状态
     NSString *selectionStatusButtonNormalImageName = @"CellGraySelected";
-    NSString *selectionStatusButtonSelectedImageName = @"CellBlueSelected";
     UIImage *selectionStatusButtonNormalImage = [UIImage lcck_imageNamed:selectionStatusButtonNormalImageName bundleName:@"Other" bundleForClass:[LCChatKit class]];
-    UIImage *selectionStatusButtonSelectedImage = [UIImage lcck_imageNamed:selectionStatusButtonSelectedImageName bundleName:@"Other" bundleForClass:[LCChatKit class]];
     [self.selectionStatusButton setImage:selectionStatusButtonNormalImage forState:UIControlStateNormal];
+    
+    // 设置选中状态
+    NSString *selectionStatusButtonSelectedImageName = @"CellBlueSelected";
+    UIImage *selectionStatusButtonSelectedImage = [UIImage lcck_imageNamed:selectionStatusButtonSelectedImageName bundleName:@"Other" bundleForClass:[LCChatKit class]];
     [self.selectionStatusButton setImage:selectionStatusButtonSelectedImage forState:UIControlStateSelected];
 }
 

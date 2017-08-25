@@ -238,6 +238,7 @@
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     [self finishLoad];
+    //FIXME:WillCrash NSRangeException
     self.title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     self.URL = self.webView.request.URL;
 }
