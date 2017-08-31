@@ -87,10 +87,12 @@ static void * const LCCKChatVoiceMessageCellVoiceMessageStateContext = (void*)&L
     [super setup];
     [self addGeneralView];
     self.voiceMessageState = LCCKVoiceMessageStateNormal;
+    
     [[LCCKAVAudioPlayer sharePlayer]  addObserver:self forKeyPath:@"audioPlayerState" options:NSKeyValueObservingOptionNew context:LCCKChatVoiceMessageCellVoiceMessageStateContext];
+    
     __unsafe_unretained __typeof(self) weakSelf = self;
     [self cyl_executeAtDealloc:^{
-        [[LCCKAVAudioPlayer sharePlayer] removeObserver:weakSelf forKeyPath:@"audioPlayerState"];
+        [weakSelf removeObserver:weakSelf forKeyPath:@"audioPlayerState" context:LCCKChatVoiceMessageCellVoiceMessageStateContext];
     }];
 }
 
@@ -101,15 +103,15 @@ static void * const LCCKChatVoiceMessageCellVoiceMessageStateContext = (void*)&L
         return;
     }
     if(context == LCCKChatVoiceMessageCellVoiceMessageStateContext) {
-        //if ([keyPath isEqualToString:@"audioPlayerState"]) {
         NSNumber *audioPlayerStateNumber = change[NSKeyValueChangeNewKey];
         LCCKVoiceMessageState audioPlayerState = [audioPlayerStateNumber intValue];
         switch (audioPlayerState) {
             case LCCKVoiceMessageStateCancel:
+                self.voiceMessageState = LCCKVoiceMessageStateCancel;
+                break;
             case LCCKVoiceMessageStateNormal:
                 self.voiceMessageState = LCCKVoiceMessageStateCancel;
                 break;
-
             default: {
                 NSString *playerIdentifier = [[LCCKAVAudioPlayer sharePlayer] identifier];
                 if (playerIdentifier) {
@@ -118,8 +120,7 @@ static void * const LCCKChatVoiceMessageCellVoiceMessageStateContext = (void*)&L
                         self.voiceMessageState = audioPlayerState;
                     }
                 }
-            }
-                break;
+            } break;
         }
     }
 }

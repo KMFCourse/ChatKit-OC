@@ -599,6 +599,8 @@ static NSString *const LCCKContactListViewControllerIdentifier = @"LCCKContactLi
         LCCKContact *contact;
         if ([contactOrUserName isKindOfClass:[NSString class]]) {
             userName = (NSString *)contactOrUserName;
+        } else if ([contactsOrUserNames isKindOfClass:[NSNumber class]]) {
+            userName = [NSString stringWithFormat:@"%@",contactOrUserName];
         } else {
             contact = (LCCKContact *)contactOrUserName;
             userName = contact.name ?: contact.clientId;
