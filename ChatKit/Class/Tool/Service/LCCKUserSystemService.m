@@ -29,11 +29,7 @@ NSString *const LCCKUserSystemServiceErrorDomain = @"LCCKUserSystemServiceErrorD
 - (NSArray<id<LCCKUserDelegate>> *)getProfilesForUserIds:(NSArray<NSString *> *)userIds error:(NSError * __autoreleasing *)theError {
     __block NSArray<id<LCCKUserDelegate>> *blockUsers = [NSArray array];
     if (!_fetchProfilesBlock && [LCCKSessionService sharedInstance].connect) {
-        // This enforces implementing `-setFetchProfilesBlock:`.
-        NSString *reason = [NSString stringWithFormat:@"You must implement `-setFetchProfilesBlock:` to allow ChatKit to get user information by user clientId."];
-        @throw [NSException exceptionWithName:NSGenericException
-                                       reason:reason
-                                     userInfo:nil];
+        NSLog(@"You must implement `-setFetchProfilesBlock:` to allow ChatKit to get user information by user clientId.");
         return nil;
     }
     LCCKFetchProfilesCompletionHandler completionHandler = ^(NSArray<id<LCCKUserDelegate>> *users, NSError *error) {
@@ -71,12 +67,6 @@ NSString *const LCCKUserSystemServiceErrorDomain = @"LCCKUserSystemServiceErrorD
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
         if (!_fetchProfilesBlock) {
-            
-            // This enforces implementing `-setFetchProfilesBlock:`.
-//            NSString *reason = [NSString stringWithFormat:@"You must implement `-setFetchProfilesBlock:` to allow ChatKit to get user information by user clientId."];
-//            @throw [NSException exceptionWithName:NSGenericException
-//                                           reason:reason
-//                                         userInfo:nil];
             //干掉抛出的异常 返回错误
             dispatch_async(dispatch_get_main_queue(),^{
                 NSInteger code = 0;

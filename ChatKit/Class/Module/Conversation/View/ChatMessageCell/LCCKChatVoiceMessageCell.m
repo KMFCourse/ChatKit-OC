@@ -88,11 +88,11 @@ static void * const LCCKChatVoiceMessageCellVoiceMessageStateContext = (void*)&L
     [self addGeneralView];
     self.voiceMessageState = LCCKVoiceMessageStateNormal;
     
-    [[LCCKAVAudioPlayer sharePlayer]  addObserver:self forKeyPath:@"audioPlayerState" options:NSKeyValueObservingOptionNew context:LCCKChatVoiceMessageCellVoiceMessageStateContext];
+    [[LCCKAVAudioPlayer sharePlayer] addObserver:self forKeyPath:@"audioPlayerState" options:NSKeyValueObservingOptionNew context:LCCKChatVoiceMessageCellVoiceMessageStateContext];
     
     __unsafe_unretained __typeof(self) weakSelf = self;
     [self cyl_executeAtDealloc:^{
-        [weakSelf removeObserver:weakSelf forKeyPath:@"audioPlayerState" context:LCCKChatVoiceMessageCellVoiceMessageStateContext];
+        [[LCCKAVAudioPlayer sharePlayer] removeObserver:weakSelf forKeyPath:@"audioPlayerState" context:LCCKChatVoiceMessageCellVoiceMessageStateContext];
     }];
 }
 
