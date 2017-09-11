@@ -9,7 +9,7 @@ PODS:
     - AVOSCloudIM/_NOARC (= 7.2.0)
   - AVOSCloudIM/_NOARC (7.2.0):
     - AVOSCloud (= 7.2.0)
-  - ChatKit (0.10.1):
+  - ChatKit (1.0.0):
     - AVOSCloud (~> 7.2.0)
     - AVOSCloudIM (~> 7.2.0)
     - CYLDeallocBlockExecutor (~> 1.1.2)
@@ -69,7 +69,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AVOSCloud: 9f09a2a734fe980685866feded7f6129141e9336
   AVOSCloudIM: a14d3ccf0808dff33160a3287c84aa7e3fa17995
-  ChatKit: 32a8466185293a46aa76a562248216bcc20f7168
+  ChatKit: b9c6a7a60848bbe16f4983188a2bec17570e0981
   CYLDeallocBlockExecutor: ecf39e45dcead9e120f460df5668b8f5093d178e
   CYLTabBarController: 8d99fccf22866fe18c978c5ff863dc6051da45ff
   CYLTableViewRowAction: 66bd3f7478b46894ff40b74d892fc85aed41656b
