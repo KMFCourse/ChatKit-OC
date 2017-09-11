@@ -36,9 +36,9 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 
 @property (strong, nonatomic) UIButton *faceButton; /**< 表情按钮 */
 @property (strong, nonatomic) UIButton *moreButton; /**< 更多按钮 */
-@property (weak, nonatomic) LCCKChatFaceView *faceView; /**< 当前活跃的底部view,用来指向faceView */
-@property (weak, nonatomic) LCCKChatMoreView *moreView; /**< 当前活跃的底部view,用来指向moreView */
-@property (weak, nonatomic) LCCKChatVoiceView *voiceView; /**< 当前活跃的底部view,用来指向voiceView */
+@property (strong, nonatomic) LCCKChatFaceView *faceView; /**< 当前活跃的底部view,用来指向faceView */
+@property (strong, nonatomic) LCCKChatMoreView *moreView; /**< 当前活跃的底部view,用来指向moreView */
+@property (strong, nonatomic) LCCKChatVoiceView *voiceView; /**< 当前活跃的底部view,用来指向voiceView */
 
 @property (assign, nonatomic, readonly) CGFloat bottomHeight;
 @property (strong, nonatomic, readonly) UIViewController *rootViewController;
@@ -115,19 +115,19 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     [self.voiceView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.width.and.left.mas_equalTo(self);
         make.height.mas_equalTo(kFunctionViewHeight);
-        make.top.mas_equalTo(self.mas_bottom);
+        make.top.mas_equalTo(self.mas_bottom).priorityMedium;
     }];
     
     [self.faceView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.width.and.left.mas_equalTo(self);
         make.height.mas_equalTo(kFunctionViewHeight);
-        make.top.mas_equalTo(self.mas_bottom);
+        make.top.mas_equalTo(self.mas_bottom).priorityMedium;
     }];
     
     [self.moreView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.width.and.left.mas_equalTo(self);
         make.height.mas_equalTo(kFunctionViewHeight);
-        make.top.mas_equalTo(self.mas_bottom);
+        make.top.mas_equalTo(self.mas_bottom).priorityMedium;
     }];
 }
 
@@ -136,8 +136,8 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     _faceView.delegate = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidEnterBackgroundNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:LCCKNotificationRecordTimeOut object:nil];
+//    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidEnterBackgroundNotification object:nil];
+//    [[NSNotificationCenter defaultCenter] removeObserver:self name:LCCKNotificationRecordTimeOut object:nil];
 }
 
 #pragma mark -
@@ -644,7 +644,9 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     if (show) {
         self.faceView.hidden = NO;
         [UIView animateWithDuration:LCCKAnimateDuration animations:^{
-            [self.faceView mas_updateConstraints:^(MASConstraintMaker *make) {
+            [self.faceView mas_remakeConstraints:^(MASConstraintMaker *make) {
+                make.width.and.left.mas_equalTo(self);
+                make.height.mas_equalTo(kFunctionViewHeight);
                 make.top.mas_equalTo(self.superview.mas_bottom).offset(-kFunctionViewHeight);
             }];
             [self.faceView layoutIfNeeded];
@@ -672,7 +674,9 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     if (show) {
         self.moreView.hidden = NO;
         [UIView animateWithDuration:LCCKAnimateDuration animations:^{
-            [self.moreView mas_updateConstraints:^(MASConstraintMaker *make) {
+            [self.moreView mas_remakeConstraints:^(MASConstraintMaker *make) {
+                make.width.and.left.mas_equalTo(self);
+                make.height.mas_equalTo(kFunctionViewHeight);
                 make.top.mas_equalTo(self.superview.mas_bottom).offset(-kFunctionViewHeight);
             }];
             [self.moreView layoutIfNeeded];
@@ -700,7 +704,9 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     if (show) {
         self.voiceView.hidden = NO;
         [UIView animateWithDuration:LCCKAnimateDuration animations:^{
-            [self.voiceView mas_updateConstraints:^(MASConstraintMaker *make) {
+            [self.voiceView mas_remakeConstraints:^(MASConstraintMaker *make) {
+                make.width.and.left.mas_equalTo(self);
+                make.height.mas_equalTo(kFunctionViewHeight);
                 make.top.mas_equalTo(self.superview.mas_bottom).offset(-kFunctionViewHeight);
             }];
             [self.voiceView layoutIfNeeded];
@@ -799,9 +805,8 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 - (LCCKChatVoiceView *)voiceView {
     if (!_voiceView) {
         LCCKChatVoiceView *voiceView = [[LCCKChatVoiceView alloc] init];
-//        voiceView.delegate = self;
         voiceView.hidden = YES;
-        voiceView.backgroundColor = self.backgroundColor;
+        voiceView.backgroundColor = [UIColor whiteColor];
         [self addSubview:(_voiceView = voiceView)];
     }
     return _voiceView;
