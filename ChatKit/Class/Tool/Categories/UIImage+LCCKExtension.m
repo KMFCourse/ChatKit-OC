@@ -151,5 +151,33 @@
     return newImage ;
 }
 
++ (instancetype)lcck_imageWithColor:(UIColor *)color
+{
+    CGRect rect = CGRectMake(0.0f, 0.0f, 1.0f, 1.0f);
+    UIGraphicsBeginImageContext(rect.size);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSetFillColorWithColor(context, [color CGColor]);
+    CGContextFillRect(context, rect);
+    UIImage *theImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return theImage;
+}
+
+- (UIImage *)circleImage
+{
+    // 开始图形上下文
+    UIGraphicsBeginImageContextWithOptions(self.size, NO, 0.0);
+    // 获得图形上下文
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGRect rect = CGRectMake(0, 0, self.size.width, self.size.height);
+    CGContextAddEllipseInRect(ctx, rect);// 根据rect创建椭圆
+    CGContextClip(ctx);// 裁剪
+    [self drawInRect:rect];// 将照片画到图形上下文
+    UIImage *newImage =
+    UIGraphicsGetImageFromCurrentImageContext();//获取剪裁的照片
+    UIGraphicsEndImageContext();// 关闭上下文
+    return newImage;
+}
+
 @end
 

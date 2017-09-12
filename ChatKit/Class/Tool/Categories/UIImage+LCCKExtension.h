@@ -12,9 +12,7 @@
 @interface UIImage (LCCKExtension)
 
 - (UIImage *)lcck_imageByScalingAspectFill;
-/*!
- * @attention This will invoke `CGSize kMaxImageViewSize = {.width = 200, .height = 200};`.
- */
+
 - (UIImage *)lcck_imageByScalingAspectFillWithOriginSize:(CGSize)originSize;
 
 - (UIImage *)lcck_imageByScalingAspectFillWithOriginSize:(CGSize)originSize
@@ -25,4 +23,5 @@
 
 - (UIImage *)lcck_scalingPatternImageToSize:(CGSize)size;
 
++ (instancetype)lcck_imageWithColor:(UIColor *)color;//从颜色返回图像
 @end
