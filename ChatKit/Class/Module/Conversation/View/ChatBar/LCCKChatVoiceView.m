@@ -9,6 +9,8 @@
 #import "LCCKChatVoiceView.h"
 #import "LCCKConstants.h"
 #import "UIImage+LCCKExtension.h"
+#import "LCCKAVAudioPlayer.h"
+#import "Mp3Recorder.h"
 
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
@@ -22,19 +24,23 @@
 
 #define kLCCKTopLineBackgroundColor  [UIColor colorWithRed:219/255.0 green:219/255.0 blue:219/255.0 alpha:1.0f]
 
-@interface LCCKChatVoiceView ()
+@interface LCCKChatVoiceView ()<Mp3RecorderDelegate>
+
+@property (strong, nonatomic) Mp3Recorder *MP3;
+@property (copy, nonatomic) NSString *mp3Path;
+@property (assign, nonatomic) NSInteger secondCount;
 
 @property (strong, nonatomic) UIView *recordView;//录音界面
 @property (strong, nonatomic) UIButton *recordButton;
 @property (strong, nonatomic) UILabel *recordLbl;
 
-
 @property (strong, nonatomic) UIView *voiceView;//试听界面
 @property (strong, nonatomic) UIButton *voiceButton;
+@property (strong, nonatomic) UILabel *voiceLbl;
 
 @property (strong, nonatomic) UIView *bottomView;
-@property (weak, nonatomic) UIButton *sendButton;
-@property (weak, nonatomic) UIButton *cancleButton;
+@property (strong, nonatomic) UIButton *sendButton;
+@property (strong, nonatomic) UIButton *cancleButton;
 
 @end
 
@@ -56,12 +62,21 @@
 
 #pragma mark - Private Methods
 - (void)setup {
+    self.mp3Path = @"";
+    self.secondCount = 0;
+    self.MP3 = [[Mp3Recorder alloc] initWithDelegate:self];
+    
     [self addLineView];
-    [self recordView];
+    
     [self.recordView addSubview:self.recordLbl];
     [self.recordView addSubview:self.recordButton];
-    [self voiceView];
-    [self.voiceView addSubview:self.bottomView];
+    
+    [self.voiceView addSubview:self.voiceLbl];
+    [self.voiceView addSubview:self.voiceButton];
+    
+    [self.bottomView addSubview:self.cancleButton];
+    [self.bottomView addSubview:self.sendButton];
+    [self addVoiceBtmLine];
     
     [self setupConstraints]; 
 }
@@ -78,20 +93,44 @@
     }];
     
     [self.recordButton mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.mas_equalTo(self).offset(12);
+        make.top.mas_equalTo(self.recordLbl.mas_bottom).offset(16);
         make.width.and.height.mas_equalTo(110);
         make.centerX.mas_equalTo(self.mas_centerX);
-//        make.centerY.mas_equalTo(self.mas_centerY);
     }];
     
     [self.voiceView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.and.bottom.and.left.and.right.mas_equalTo(self);
     }];
     
-    [self.recordButton mas_makeConstraints:^(MASConstraintMaker *make) {
+    [self.voiceLbl mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.mas_equalTo(self).offset(16);
-        make.bottom.mas_equalTo(self).offset(-60);
+        make.left.and.right.mas_equalTo(self);
+        make.height.mas_equalTo(16);
+    }];
+    
+    [self.voiceButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.voiceLbl.mas_bottom).offset(16);
+        make.width.and.height.mas_equalTo(110);
         make.centerX.mas_equalTo(self.mas_centerX);
+    }];
+    
+    [self.bottomView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.and.left.and.right.mas_equalTo(self);
+        make.height.mas_equalTo(48);
+    }];
+    
+    [self.cancleButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.bottomView);
+        make.height.equalTo(@(48));
+        make.centerY.equalTo(self.bottomView);
+    }];
+    
+    [self.sendButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.cancleButton.mas_right);
+        make.right.equalTo(self.bottomView.mas_right);
+        make.height.equalTo(self.cancleButton);
+        make.width.equalTo(self.cancleButton);
+        make.centerY.equalTo(self.cancleButton);
     }];
 }
 
@@ -100,8 +139,7 @@
 
 #pragma mark - Getters
 
-- (void)addLineView
-{
+- (void)addLineView {
     UIImageView *topLine = [[UIImageView alloc] init];
     topLine.backgroundColor = kLCCKTopLineBackgroundColor;
     [self addSubview:topLine];
@@ -111,9 +149,28 @@
     }];
 }
 
+- (void)addVoiceBtmLine {
+    UIImageView *topLine = [[UIImageView alloc] init];
+    topLine.backgroundColor = kLCCKTopLineBackgroundColor;
+    [self.bottomView addSubview:topLine];
+    [topLine mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.and.top.and.width.mas_equalTo(self.bottomView);
+        make.height.mas_equalTo(.5f);
+    }];
+    
+    UIImageView *centerLine = [[UIImageView alloc] init];
+    centerLine.backgroundColor = kLCCKTopLineBackgroundColor;
+    [self.bottomView addSubview:centerLine];
+    [centerLine mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.bottomView).offset(11);
+        make.bottom.mas_equalTo(self.bottomView).offset(-11);
+        make.width.mas_equalTo(.5f);
+        make.centerX.mas_equalTo(self.bottomView.mas_centerX);
+    }];
+}
+
 // 录音界面
-- (UIView *)recordView
-{
+- (UIView *)recordView {
     if (!_recordView) {
         UIView * recordView = [[UIView alloc] init];
         recordView.backgroundColor = [UIColor clearColor];
@@ -123,8 +180,7 @@
     return _recordView;
 }
 
-- (UILabel *)recordLbl
-{
+- (UILabel *)recordLbl {
     if (!_recordLbl) {
         _recordLbl = [[UILabel alloc] init];
         _recordLbl.text = @"按住开始录制";
@@ -135,10 +191,9 @@
     return _recordLbl;
 }
 
-- (UIButton *)recordButton
-{
+- (UIButton *)recordButton {
     if (!_recordButton) {
-        _recordButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 44, 110, 110)];
+        _recordButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 110, 110)];
         _recordButton.layer.masksToBounds = YES;
         _recordButton.layer.cornerRadius = _recordButton.frame.size.width/2;
         _recordButton.layer.borderColor = kLCCKHexRGB(0xDBDBDB).CGColor;
@@ -148,17 +203,15 @@
         [_recordButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_start"] forState:UIControlStateNormal];
         [_recordButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_starting"] forState:UIControlStateHighlighted];
         
-        [_recordButton addTarget:self action:@selector(touchRecordVoice) forControlEvents:UIControlEventTouchDown];
-        [_recordButton addTarget:self action:@selector(startRecordVoice) forControlEvents:UIControlEventTouchUpInside];
-        [_recordButton addTarget:self action:@selector(stopRecordVoice) forControlEvents:UIControlEventTouchUpOutside];
-        [_recordButton addTarget:self action:@selector(cancleRecordVoice) forControlEvents:UIControlEventTouchCancel];
+        [_recordButton addTarget:self action:@selector(startRecordVoice) forControlEvents:UIControlEventTouchDown];
+        [_recordButton addTarget:self action:@selector(cancelRecordVoice) forControlEvents:UIControlEventTouchUpOutside];
+        [_recordButton addTarget:self action:@selector(confirmRecordVoice) forControlEvents:UIControlEventTouchUpInside];
     }
     return _recordButton;
 }
 
 // 播放界面
-- (UIView *)voiceView
-{
+- (UIView *)voiceView {
     if (!_voiceView) {
         UIView * voiceView = [[UIView alloc] init];
         voiceView.backgroundColor = [UIColor clearColor];
@@ -168,22 +221,95 @@
     return _voiceView;
 }
 
-- (UIButton *)voiceButton
-{
+- (UILabel *)voiceLbl {
+    if (!_voiceLbl) {
+        _voiceLbl = [[UILabel alloc] init];
+        _voiceLbl.text = @"00:00";
+        _voiceLbl.font = [UIFont systemFontOfSize:16.f];
+        _voiceLbl.textColor = kLCCKHexRGB(0xA5A5A5);
+        _voiceLbl.textAlignment = NSTextAlignmentCenter;
+    }
+    return _voiceLbl;
+}
+
+- (UIButton *)voiceButton {
     if (!_voiceButton) {
-        _voiceButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _voiceButton.backgroundColor = [UIColor lightGrayColor];
+        _voiceButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 110, 110)];
+        _voiceButton.layer.masksToBounds = YES;
+        _voiceButton.layer.cornerRadius = _voiceButton.frame.size.width/2;
+        _voiceButton.layer.borderColor = kLCCKHexRGB(0xDBDBDB).CGColor;
+        _voiceButton.layer.borderWidth = 5;
+        [_voiceButton setBackgroundImage:[UIImage lcck_imageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+        [_voiceButton setBackgroundImage:[UIImage lcck_imageWithColor:kLCCKHexRGB(0x3EA0F3)] forState:UIControlStateHighlighted];
+        [_voiceButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_start"] forState:UIControlStateNormal];
+        [_voiceButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_starting"] forState:UIControlStateHighlighted];
+        [_voiceButton addTarget:self action:@selector(userTouchVoiceButton:) forControlEvents:UIControlEventTouchUpInside];
     }
     return _voiceButton;
 }
 
-- (UIView *)bottomView
-{
+- (UIView *)bottomView {
     if (!_bottomView) {
         _bottomView = [[UIView alloc] init];
-        _bottomView.backgroundColor = [UIColor blackColor];
+        [self.voiceView addSubview:_bottomView];
     }
     return _bottomView;
+}
+
+- (UIButton *)cancleButton {
+    if (!_cancleButton) {
+        _cancleButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_cancleButton setTitle:@"取消" forState:UIControlStateNormal];
+        [_cancleButton setTitleColor:kLCCKHexRGB(0x3EA0F3) forState:UIControlStateNormal];
+        _cancleButton.titleLabel.font = [UIFont systemFontOfSize:16];
+        [_cancleButton addTarget:self action:@selector(userTouchCancleAction:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _cancleButton;
+}
+
+- (UIButton *)sendButton {
+    if (!_sendButton) {
+        _sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_sendButton setTitle:@"发送" forState:UIControlStateNormal];
+        [_sendButton setTitleColor:kLCCKHexRGB(0x3EA0F3) forState:UIControlStateNormal];
+        _sendButton.titleLabel.font = [UIFont systemFontOfSize:16];
+        [_sendButton addTarget:self action:@selector(userTouchSendAction:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _sendButton;
+}
+
+#pragma mark - Mp3RecorderDelegate
+
+- (void)endConvertWithMP3FileName:(NSString *)fileName {
+    if (fileName) {
+        [self reloadVoiceTitle:fileName];
+        [self switchToVoiceVoice:YES];
+    }
+}
+
+- (void)reloadVoiceTitle:(NSString *)fileName {
+    AVURLAsset * audioAsset = [AVURLAsset URLAssetWithURL:[NSURL fileURLWithPath:fileName] options:nil];
+    CMTime audioDuration = audioAsset.duration;
+    int audioDurationSeconds = (int)CMTimeGetSeconds(audioDuration);
+    
+    self.secondCount = audioDurationSeconds;
+    self.mp3Path = fileName;
+    
+    int m = audioDurationSeconds/60;
+    int s = audioDurationSeconds-m*60;
+    if (m >0) {
+        self.voiceLbl.text = [NSString stringWithFormat:@"%02d:%02d",m,s];
+    } else {
+        self.voiceLbl.text = [NSString stringWithFormat:@"00:%02d",s];
+    }
+}
+
+- (void)failRecord {
+    NSLog(@"出现错误");
+}
+
+- (void)beginConvert {
+    NSLog(@"正在转换");
 }
 
 #pragma mark - Action
@@ -192,30 +318,47 @@
     // 判断权限
     if ([self judgeAVAudioSession]) {
         self.recordLbl.text = @"松开完成录制";
-        //        [self.MP3 startRecord];
+        self.recordButton.layer.borderWidth = 0;
+        self.recordButton.highlighted = YES;
+        [self.MP3 startRecord];
     } else {
         [[NSNotificationCenter defaultCenter] postNotificationName:LCCKNotificationRecordNoPower object:nil];
     }
 }
 
 //取消录音
-- (void)stopRecordVoice {
+- (void)cancelRecordVoice {
+    self.recordButton.highlighted = NO;
+    [self.MP3 cancelRecord];
+}
+
+//录音结束
+- (void)confirmRecordVoice {
     self.recordLbl.text = @"按住进行录制";
-        self.recordButton.layer.borderWidth = 5;
-    //    [self.MP3 stopRecord];
+    self.recordButton.layer.borderWidth = 5;
+    [self.MP3 stopRecord];
 }
 
-- (void)touchRecordVoice {
-    self.recordButton.layer.borderWidth = 0;
+- (void)switchToVoiceVoice:(BOOL)isShow {
+    self.recordView.hidden = isShow;
+    self.voiceView.hidden = !isShow;
 }
 
-- (void)cancleRecordVoice {
-//    self.recordButton.layer.borderWidth = 5;
+- (void)userTouchCancleAction:(UIButton *)sender {
+    [self switchToVoiceVoice:NO];
 }
 
-//进入后台 取消当前的录音
-- (void)appBecomeBackgroundCancelRecordVoice {
-    [self stopRecordVoice];
+- (void)userTouchSendAction:(UIButton *)sender {
+    if (_mp3Path && _mp3Path.length > 0) {
+//        [self sendVoiceMessage:_mp3Path seconds:@""];
+    }
+}
+
+- (void)userTouchVoiceButton:(UIButton *)sender {
+    NSLog(@"_____________%@",self.mp3Path);
+    if (self.mp3Path.length > 0 && self.secondCount > 0) {
+        [[LCCKAVAudioPlayer sharePlayer] playAudioWithURLString:self.mp3Path identifier:@"LCCKVoiceView"];
+    }
 }
 
 #pragma mark - Private Methods

@@ -28,8 +28,8 @@ NSString *const kLCCKBatchDeleteTextPrefix = @"kLCCKBatchDeleteTextPrefix";
 NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 
 @interface LCCKChatBar () <UITextViewDelegate, UINavigationControllerDelegate, Mp3RecorderDelegate, LCCKChatFaceViewDelegate>
-
-@property (strong, nonatomic) Mp3Recorder *MP3;
+//
+//@property (strong, nonatomic) Mp3Recorder *MP3;
 @property (nonatomic, strong) UIView *inputBarBackgroundView; /**< 输入栏目背景视图 */
 @property (strong, nonatomic) UIButton *voiceButton; /**< 切换录音模式按钮 */
 @property (strong, nonatomic) UIButton *voiceRecordButton; /**< 录音按钮 */
@@ -345,7 +345,7 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 }
 
 #pragma mark - MP3RecordedDelegate
-
+//
 //- (void)endConvertWithMP3FileName:(NSString *)fileName {
 //    if (fileName) {
 //        [LCCKProgressHUD dismissWithProgressState:LCCKProgressSuccess];
@@ -500,7 +500,7 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     self.isTimeOut = NO;
     self.oldTextViewHeight = kLCCKChatBarTextViewFrameMinHeight;
     self.allowTextViewContentOffset = YES;
-    self.MP3 = [[Mp3Recorder alloc] initWithDelegate:self];
+//    self.MP3 = [[Mp3Recorder alloc] initWithDelegate:self];
     [self faceView];
     [self moreView];
     [self voiceView];
