@@ -12,6 +12,12 @@
 #import "LCCKAVAudioPlayer.h"
 #import "Mp3Recorder.h"
 
+#if __has_include(<EHCircularProgressView.h>)
+#import <EHCircularProgressView.h>
+#else
+#import "EHCircularProgressView.h"
+#endif
+
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
 #else
@@ -25,6 +31,9 @@
 #define kLCCKTopLineBackgroundColor  [UIColor colorWithRed:219/255.0 green:219/255.0 blue:219/255.0 alpha:1.0f]
 
 @interface LCCKChatVoiceView ()<Mp3RecorderDelegate>
+{
+    dispatch_source_t _timer;
+}
 
 @property (strong, nonatomic) Mp3Recorder *MP3;
 @property (copy, nonatomic) NSString *mp3Path;
@@ -37,6 +46,7 @@
 @property (strong, nonatomic) UIView *voiceView;//试听界面
 @property (strong, nonatomic) UIButton *voiceButton;
 @property (strong, nonatomic) UILabel *voiceLbl;
+@property (strong, nonatomic) EHCircularProgressView *progressView;
 
 @property (strong, nonatomic) UIView *bottomView;
 @property (strong, nonatomic) UIButton *sendButton;
@@ -73,6 +83,8 @@
     
     [self.voiceView addSubview:self.voiceLbl];
     [self.voiceView addSubview:self.voiceButton];
+    [self.voiceView addSubview:self.progressView];
+    [self.voiceView sendSubviewToBack:self.progressView];
     
     [self.bottomView addSubview:self.cancleButton];
     [self.bottomView addSubview:self.sendButton];
@@ -112,6 +124,11 @@
         make.top.mas_equalTo(self.voiceLbl.mas_bottom).offset(16);
         make.width.and.height.mas_equalTo(110);
         make.centerX.mas_equalTo(self.mas_centerX);
+    }];
+    
+    [self.progressView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.and.centerY.mas_equalTo(self.voiceButton);
+        make.width.height.mas_equalTo(self.voiceButton).offset(5);
     }];
     
     [self.bottomView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -237,8 +254,6 @@
         _voiceButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 110, 110)];
         _voiceButton.layer.masksToBounds = YES;
         _voiceButton.layer.cornerRadius = _voiceButton.frame.size.width/2;
-        _voiceButton.layer.borderColor = kLCCKHexRGB(0xDBDBDB).CGColor;
-        _voiceButton.layer.borderWidth = 5;
         [_voiceButton setBackgroundImage:[UIImage lcck_imageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
         [_voiceButton setBackgroundImage:[UIImage lcck_imageWithColor:kLCCKHexRGB(0x3EA0F3)] forState:UIControlStateHighlighted];
         [_voiceButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_start"] forState:UIControlStateNormal];
@@ -246,6 +261,18 @@
         [_voiceButton addTarget:self action:@selector(userTouchVoiceButton:) forControlEvents:UIControlEventTouchUpInside];
     }
     return _voiceButton;
+}
+
+- (EHCircularProgressView *)progressView {
+    if (!_progressView) {
+        _progressView = [[EHCircularProgressView alloc] initWithFrame:CGRectZero];
+        _progressView.translatesAutoresizingMaskIntoConstraints = NO;
+        _progressView.trackTintColor = kLCCKHexRGB(0xd4d4d4);
+        _progressView.progressTintColor = [UIColor colorWithRed:0.612 green:0.604 blue:0.745 alpha:1.000];
+        _progressView.innerTintColor = [UIColor clearColor];
+        _progressView.thicknessRatio = 0.05;
+    }
+    return _progressView;
 }
 
 - (UIView *)bottomView {
@@ -346,18 +373,22 @@
 
 - (void)userTouchCancleAction:(UIButton *)sender {
     [self switchToVoiceVoice:NO];
+    [self endHeartbeatPacket];
 }
 
 - (void)userTouchSendAction:(UIButton *)sender {
     if (_mp3Path && _mp3Path.length > 0) {
 //        [self sendVoiceMessage:_mp3Path seconds:@""];
+        [self endHeartbeatPacket];
     }
 }
 
 - (void)userTouchVoiceButton:(UIButton *)sender {
-    NSLog(@"_____________%@",self.mp3Path);
     if (self.mp3Path.length > 0 && self.secondCount > 0) {
         [[LCCKAVAudioPlayer sharePlayer] playAudioWithURLString:self.mp3Path identifier:@"LCCKVoiceView"];
+        self.progressView.progress = 0;
+        self.voiceLbl.text = @"00:00";
+        [self startHeartbeatPacket];
     }
 }
 
@@ -379,6 +410,47 @@
     return   ({
         UIImage *image = [UIImage lcck_imageNamed:imageName bundleName:@"ChatKeyboard" bundleForClass:[self class]];
         image;});
+}
+
+#pragma mark - Heartbeat Packet
+// 开始
+- (void)startHeartbeatPacket
+{
+    __block float finishNum = 0;
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    _timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,queue);
+    dispatch_source_set_timer(_timer, dispatch_walltime(NULL, 0), 0.25 * NSEC_PER_SEC, 0);
+    dispatch_source_set_event_handler(_timer, ^{
+        finishNum += 0.25;
+        NSLog(@"%d",finishNum);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            int m = finishNum/60;
+            int s = finishNum-m*60;
+            if (m >0) {
+                self.voiceLbl.text = [NSString stringWithFormat:@"%02d:%02d",m,s];
+            } else {
+                self.voiceLbl.text = [NSString stringWithFormat:@"00:%02d",s];
+            }
+            
+            if (finishNum == _secondCount) {
+                dispatch_source_cancel(_timer);
+                _progressView.progress = 1;
+            } else {
+                CGFloat duration = finishNum / _secondCount;
+                [_progressView setProgress:duration animated:YES];
+            }
+        });
+    });
+    dispatch_resume(_timer);
+}
+
+// 结束
+- (void)endHeartbeatPacket
+{
+    if (_timer) {
+        dispatch_source_cancel(_timer);
+    }
 }
 
 @end
