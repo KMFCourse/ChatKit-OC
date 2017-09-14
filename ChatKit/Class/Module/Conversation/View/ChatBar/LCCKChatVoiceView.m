@@ -12,10 +12,10 @@
 #import "LCCKAVAudioPlayer.h"
 #import "Mp3Recorder.h"
 
-#if __has_include(<EHCircularProgressView.h>)
-#import <EHCircularProgressView.h>
+#if __has_include(<DACircularProgressView.h>)
+#import <DACircularProgressView.h>
 #else
-#import "EHCircularProgressView.h"
+#import "DACircularProgressView.h"
 #endif
 
 #if __has_include(<Masonry/Masonry.h>)
@@ -46,7 +46,7 @@
 @property (strong, nonatomic) UIView *voiceView;//试听界面
 @property (strong, nonatomic) UIButton *voiceButton;
 @property (strong, nonatomic) UILabel *voiceLbl;
-@property (strong, nonatomic) EHCircularProgressView *progressView;
+@property (strong, nonatomic) DACircularProgressView *progressView;
 
 @property (strong, nonatomic) UIView *bottomView;
 @property (strong, nonatomic) UIButton *sendButton;
@@ -214,7 +214,7 @@
         _recordButton.layer.masksToBounds = YES;
         _recordButton.layer.cornerRadius = _recordButton.frame.size.width/2;
         _recordButton.layer.borderColor = kLCCKHexRGB(0xDBDBDB).CGColor;
-        _recordButton.layer.borderWidth = 5;
+        _recordButton.layer.borderWidth = 2;
         [_recordButton setBackgroundImage:[UIImage lcck_imageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
         [_recordButton setBackgroundImage:[UIImage lcck_imageWithColor:kLCCKHexRGB(0x3EA0F3)] forState:UIControlStateHighlighted];
         [_recordButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_start"] forState:UIControlStateNormal];
@@ -263,14 +263,14 @@
     return _voiceButton;
 }
 
-- (EHCircularProgressView *)progressView {
+- (DACircularProgressView *)progressView {
     if (!_progressView) {
-        _progressView = [[EHCircularProgressView alloc] initWithFrame:CGRectZero];
+        _progressView = [[DACircularProgressView alloc] initWithFrame:CGRectZero];
         _progressView.translatesAutoresizingMaskIntoConstraints = NO;
         _progressView.trackTintColor = kLCCKHexRGB(0xDBDBDB);
         _progressView.progressTintColor = kLCCKHexRGB(0x3EA0F3);
         _progressView.innerTintColor = [UIColor clearColor];
-        _progressView.thicknessRatio = 0.05;
+        _progressView.thicknessRatio = 0.1;
     }
     return _progressView;
 }
@@ -362,7 +362,7 @@
 //录音结束
 - (void)confirmRecordVoice {
     self.recordLbl.text = @"按住进行录制";
-    self.recordButton.layer.borderWidth = 5;
+    self.recordButton.layer.borderWidth = 2;
     [self.MP3 stopRecord];
 }
 
@@ -398,7 +398,7 @@
             [self endHeartbeatPacket];
             [self reloadVoiceTitle:self.mp3Path];
         }
-        self.progressView.progress = 0;
+        [self.progressView setProgress:0];
         self.voiceButton.selected = !self.voiceButton.selected;
     }
 }
@@ -430,7 +430,7 @@
     __block float finishNum = 0;
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     _timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,queue);
-    dispatch_source_set_timer(_timer, dispatch_walltime(NULL, 0), 0.2 * NSEC_PER_SEC, 0);
+    dispatch_source_set_timer(_timer, dispatch_walltime(NULL, 0), 0.02 * NSEC_PER_SEC, 0);
     dispatch_source_set_event_handler(_timer, ^{
         
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -439,10 +439,10 @@
                 [[LCCKAVAudioPlayer sharePlayer] stopAudioPlayer];
                 [self endHeartbeatPacket];
                 
-                self.progressView.progress = 0;
+                [self.progressView setProgress:0];
                 self.voiceButton.selected = NO;
             } else {
-                finishNum = finishNum + 0.2;
+                finishNum = finishNum + 0.02;
                 
                 CGFloat duration = finishNum / _secondCount;
                 [_progressView setProgress:duration animated:YES];
