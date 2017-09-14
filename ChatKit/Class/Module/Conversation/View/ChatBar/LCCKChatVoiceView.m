@@ -267,8 +267,8 @@
     if (!_progressView) {
         _progressView = [[EHCircularProgressView alloc] initWithFrame:CGRectZero];
         _progressView.translatesAutoresizingMaskIntoConstraints = NO;
-        _progressView.trackTintColor = kLCCKHexRGB(0xd4d4d4);
-        _progressView.progressTintColor = [UIColor colorWithRed:0.612 green:0.604 blue:0.745 alpha:1.000];
+        _progressView.trackTintColor = kLCCKHexRGB(0xDBDBDB);
+        _progressView.progressTintColor = kLCCKHexRGB(0x3EA0F3);
         _progressView.innerTintColor = [UIColor clearColor];
         _progressView.thicknessRatio = 0.05;
     }

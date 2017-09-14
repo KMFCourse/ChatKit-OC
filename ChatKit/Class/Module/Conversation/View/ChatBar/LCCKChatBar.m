@@ -11,9 +11,6 @@
 #import "LCCKChatFaceView.h"
 #import "LCCKChatVoiceView.h"
 
-//#import "LCCKProgressHUD.h"
-#import "Mp3Recorder.h"
-
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
 #else
@@ -27,9 +24,8 @@
 NSString *const kLCCKBatchDeleteTextPrefix = @"kLCCKBatchDeleteTextPrefix";
 NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 
-@interface LCCKChatBar () <UITextViewDelegate, UINavigationControllerDelegate, Mp3RecorderDelegate, LCCKChatFaceViewDelegate,LCCKChatVoiceViewDelegate>
-//
-//@property (strong, nonatomic) Mp3Recorder *MP3;
+@interface LCCKChatBar () <UITextViewDelegate, UINavigationControllerDelegate, LCCKChatFaceViewDelegate,LCCKChatVoiceViewDelegate>
+
 @property (nonatomic, strong) UIView *inputBarBackgroundView; /**< 输入栏目背景视图 */
 @property (strong, nonatomic) UIButton *voiceButton; /**< 切换录音模式按钮 */
 @property (strong, nonatomic) UIButton *voiceRecordButton; /**< 录音按钮 */
@@ -52,10 +48,6 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 @property (nonatomic, assign) BOOL isTimeOut;//是否超时
 
 #pragma mark - MessageInputView Customize UI
-///=============================================================================
-/// @name MessageInputView Customize UI
-///=============================================================================
-
 @property (nonatomic, strong) UIColor *messageInputViewBackgroundColor;
 @property (nonatomic, strong) UIColor *messageInputViewTextFieldTextColor;
 @property (nonatomic, strong) UIColor *messageInputViewTextFieldBackgroundColor;
@@ -175,7 +167,7 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
         [self sendTextMessage:textView.text];
         return NO;
     } else if (text.length == 0){
-        //构造元素需要使用两个空格来进行缩进，右括号]或者}写在新的一行，并且与调用语法糖那行代码的第一个非空字符对齐：
+        //构造元素需要用两个空格进行缩进，右括号]或者}写在新的一行，并且与调用语法糖那行代码的第一个非空字符对齐
         NSArray *defaultRegulations = @[
                                         //判断删除的文字是否符合表情文字规则
                                         @{
