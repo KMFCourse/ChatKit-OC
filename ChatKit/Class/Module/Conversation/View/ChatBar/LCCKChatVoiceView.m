@@ -106,7 +106,7 @@
     
     [self.recordButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.mas_equalTo(self.recordLbl.mas_bottom).offset(16);
-        make.width.and.height.mas_equalTo(110);
+        make.width.and.height.mas_equalTo(100);
         make.centerX.mas_equalTo(self.mas_centerX);
     }];
     
@@ -122,7 +122,7 @@
     
     [self.voiceButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.mas_equalTo(self.voiceLbl.mas_bottom).offset(16);
-        make.width.and.height.mas_equalTo(110);
+        make.width.and.height.mas_equalTo(100);
         make.centerX.mas_equalTo(self.mas_centerX);
     }];
     
@@ -210,7 +210,7 @@
 
 - (UIButton *)recordButton {
     if (!_recordButton) {
-        _recordButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 110, 110)];
+        _recordButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
         _recordButton.layer.masksToBounds = YES;
         _recordButton.layer.cornerRadius = _recordButton.frame.size.width/2;
         _recordButton.layer.borderColor = kLCCKHexRGB(0xDBDBDB).CGColor;
@@ -251,13 +251,13 @@
 
 - (UIButton *)voiceButton {
     if (!_voiceButton) {
-        _voiceButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 110, 110)];
+        _voiceButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
         _voiceButton.layer.masksToBounds = YES;
         _voiceButton.layer.cornerRadius = _voiceButton.frame.size.width/2;
         [_voiceButton setBackgroundImage:[UIImage lcck_imageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
         [_voiceButton setBackgroundImage:[UIImage lcck_imageWithColor:kLCCKHexRGB(0x3EA0F3)] forState:UIControlStateHighlighted];
-        [_voiceButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_start"] forState:UIControlStateNormal];
-        [_voiceButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_starting"] forState:UIControlStateHighlighted];
+        [_voiceButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_play"] forState:UIControlStateNormal];
+        [_voiceButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_stop"] forState:UIControlStateSelected];
         [_voiceButton addTarget:self action:@selector(userTouchVoiceButton:) forControlEvents:UIControlEventTouchUpInside];
     }
     return _voiceButton;
@@ -377,18 +377,29 @@
 }
 
 - (void)userTouchSendAction:(UIButton *)sender {
-    if (_mp3Path && _mp3Path.length > 0) {
-//        [self sendVoiceMessage:_mp3Path seconds:@""];
+    
+    if (_mp3Path.length > 0 && _secondCount > 0) {
         [self endHeartbeatPacket];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(voiceViewSendVoiceMessage:seconds:)]) {
+            [self.delegate voiceViewSendVoiceMessage:_mp3Path seconds:_secondCount];
+        }
     }
 }
 
 - (void)userTouchVoiceButton:(UIButton *)sender {
     if (self.mp3Path.length > 0 && self.secondCount > 0) {
-        [[LCCKAVAudioPlayer sharePlayer] playAudioWithURLString:self.mp3Path identifier:@"LCCKVoiceView"];
+        
+        if (sender.selected == NO) {
+            [[LCCKAVAudioPlayer sharePlayer] playAudioWithURLString:self.mp3Path identifier:@"LCCKVoiceView"];
+            self.voiceLbl.text = @"00:00";
+            [self startHeartbeatPacket];
+        } else {
+            [[LCCKAVAudioPlayer sharePlayer] stopAudioPlayer];
+            [self endHeartbeatPacket];
+            [self reloadVoiceTitle:self.mp3Path];
+        }
         self.progressView.progress = 0;
-        self.voiceLbl.text = @"00:00";
-        [self startHeartbeatPacket];
+        self.voiceButton.selected = !self.voiceButton.selected;
     }
 }
 
@@ -419,26 +430,30 @@
     __block float finishNum = 0;
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     _timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,queue);
-    dispatch_source_set_timer(_timer, dispatch_walltime(NULL, 0), 0.25 * NSEC_PER_SEC, 0);
+    dispatch_source_set_timer(_timer, dispatch_walltime(NULL, 0), 0.2 * NSEC_PER_SEC, 0);
     dispatch_source_set_event_handler(_timer, ^{
-        finishNum += 0.25;
-        NSLog(@"%d",finishNum);
+        
         dispatch_async(dispatch_get_main_queue(), ^{
             
-            int m = finishNum/60;
-            int s = finishNum-m*60;
-            if (m >0) {
-                self.voiceLbl.text = [NSString stringWithFormat:@"%02d:%02d",m,s];
+            if (finishNum > _secondCount) {
+                [[LCCKAVAudioPlayer sharePlayer] stopAudioPlayer];
+                [self endHeartbeatPacket];
+                
+                self.progressView.progress = 0;
+                self.voiceButton.selected = NO;
             } else {
-                self.voiceLbl.text = [NSString stringWithFormat:@"00:%02d",s];
-            }
-            
-            if (finishNum == _secondCount) {
-                dispatch_source_cancel(_timer);
-                _progressView.progress = 1;
-            } else {
+                finishNum = finishNum + 0.2;
+                
                 CGFloat duration = finishNum / _secondCount;
                 [_progressView setProgress:duration animated:YES];
+                
+                int m = finishNum/60;
+                int s = finishNum-m*60;
+                if (m >0) {
+                    self.voiceLbl.text = [NSString stringWithFormat:@"%02d:%02d",m,s];
+                } else {
+                    self.voiceLbl.text = [NSString stringWithFormat:@"00:%02d",s];
+                }
             }
         });
     });

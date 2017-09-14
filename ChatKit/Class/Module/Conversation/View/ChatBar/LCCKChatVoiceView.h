@@ -8,6 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol LCCKChatVoiceViewDelegate <NSObject>
+
+- (void)voiceViewSendVoiceMessage:(NSString *)mp3Path seconds:(NSTimeInterval )second;
+
+@end
+
 @interface LCCKChatVoiceView : UIView
+
+@property (weak, nonatomic) id<LCCKChatVoiceViewDelegate> delegate;
 
 @end

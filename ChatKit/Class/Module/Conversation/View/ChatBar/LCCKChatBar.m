@@ -27,7 +27,7 @@
 NSString *const kLCCKBatchDeleteTextPrefix = @"kLCCKBatchDeleteTextPrefix";
 NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 
-@interface LCCKChatBar () <UITextViewDelegate, UINavigationControllerDelegate, Mp3RecorderDelegate, LCCKChatFaceViewDelegate>
+@interface LCCKChatBar () <UITextViewDelegate, UINavigationControllerDelegate, Mp3RecorderDelegate, LCCKChatFaceViewDelegate,LCCKChatVoiceViewDelegate>
 //
 //@property (strong, nonatomic) Mp3Recorder *MP3;
 @property (nonatomic, strong) UIView *inputBarBackgroundView; /**< 输入栏目背景视图 */
@@ -134,10 +134,9 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 - (void)dealloc {
     self.delegate = nil;
     _faceView.delegate = nil;
+    _voiceView.delegate = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidEnterBackgroundNotification object:nil];
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:LCCKNotificationRecordTimeOut object:nil];
 }
 
 #pragma mark -
@@ -344,25 +343,11 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     });
 }
 
-#pragma mark - MP3RecordedDelegate
-//
-//- (void)endConvertWithMP3FileName:(NSString *)fileName {
-//    if (fileName) {
-//        [LCCKProgressHUD dismissWithProgressState:LCCKProgressSuccess];
-//        [self sendVoiceMessage:fileName seconds:[LCCKProgressHUD seconds]];
-//    } else {
-//        [LCCKProgressHUD dismissWithProgressState:LCCKProgressError];
-//    }
-//}
-//
-//- (void)failRecord {
-//    // 此回调在录音时长小于1时调用 应该提示Short而不是Error
-//    [LCCKProgressHUD dismissWithProgressState:LCCKProgressShort];
-//}
-//
-//- (void)beginConvert {
-//    [LCCKProgressHUD changeSubTitle:@"正在转换..."];
-//}
+#pragma mark - LCCKChatVoiceViewDelegate
+
+- (void)voiceViewSendVoiceMessage:(NSString *)mp3Path seconds:(NSTimeInterval)second {
+    [self sendVoiceMessage:mp3Path seconds:second];
+}
 
 #pragma mark - LCCKChatFaceViewDelegate
 
@@ -500,7 +485,7 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     self.isTimeOut = NO;
     self.oldTextViewHeight = kLCCKChatBarTextViewFrameMinHeight;
     self.allowTextViewContentOffset = YES;
-//    self.MP3 = [[Mp3Recorder alloc] initWithDelegate:self];
+
     [self faceView];
     [self moreView];
     [self voiceView];
@@ -522,69 +507,10 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
-    
-    //修复录音时点击Home键 在返回App后 仍然显示录音动效的问题
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appBecomeBackgroundCancelRecordVoice) name:UIApplicationDidEnterBackgroundNotification object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appRecieveMsgFromRecordTimer) name:LCCKNotificationRecordTimeOut object:nil];
 
     self.backgroundColor = self.messageInputViewBackgroundColor;
     [self setupConstraints];
 }
-
-
-////开始录音
-//- (void)startRecordVoice {
-//    // 判断权限
-//    if ([self judgeAVAudioSession]) {
-//        [LCCKProgressHUD show];
-////        self.voiceRecordButton.highlighted = YES;
-//        [self.MP3 startRecord];
-//    } else {
-//        [[NSNotificationCenter defaultCenter] postNotificationName:LCCKNotificationRecordNoPower object:nil];
-//    }
-//}
-//
-////取消录音
-//- (void)cancelRecordVoice {
-//    [LCCKProgressHUD dismissWithMessage:@"取消录音"];
-////    self.voiceRecordButton.highlighted = NO;
-//    [self.MP3 cancelRecord];
-//}
-//
-////录音结束
-//- (void)confirmRecordVoice {
-//    if (self.isTimeOut == NO) {
-//        [self.MP3 stopRecord];
-//    } else {
-//        self.isTimeOut = NO;
-//    }
-//}
-//
-////更新录音显示状态,手指向上滑动后提示松开取消录音
-//- (void)updateCancelRecordVoice {
-//    [LCCKProgressHUD changeSubTitle:@"松开取消录音"];
-//}
-//
-////更新录音状态,手指重新滑动到范围内,提示向上取消录音
-//- (void)updateContinueRecordVoice {
-//    [LCCKProgressHUD changeSubTitle:@"向上滑动取消录音"];
-//}
-//
-////进入后台 取消当前的录音
-//- (void)appBecomeBackgroundCancelRecordVoice {
-//    [self cancelRecordVoice];
-//}
-//
-////倒计时结束 完成当前的录音
-//- (void)appRecieveMsgFromRecordTimer
-//{
-//    if (self.voiceRecordButton.highlighted == YES) {
-//        self.voiceRecordButton.selected = NO;
-//        self.voiceRecordButton.highlighted = NO;
-//        [self.MP3 stopRecord];
-//        self.isTimeOut = YES;
-//    }
-//}
 
 - (void)setShowType:(LCCKFunctionViewShowType)showType {
     if (_showType == showType)
@@ -805,6 +731,7 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 - (LCCKChatVoiceView *)voiceView {
     if (!_voiceView) {
         LCCKChatVoiceView *voiceView = [[LCCKChatVoiceView alloc] init];
+        voiceView.delegate = self;
         voiceView.hidden = YES;
         voiceView.backgroundColor = [UIColor whiteColor];
         [self addSubview:(_voiceView = voiceView)];
@@ -850,19 +777,6 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
         _voiceRecordButton.frame = self.textView.bounds;
         _voiceRecordButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [_voiceRecordButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-//        UIEdgeInsets edgeInsets = UIEdgeInsetsMake(9, 9, 9, 9);
-//        UIImage *voiceRecordButtonNormalBackgroundImage = [[self imageInBundlePathForImageName:@"VoiceBtn_Black"] resizableImageWithCapInsets:edgeInsets resizingMode:UIImageResizingModeStretch];
-//        UIImage *voiceRecordButtonHighlightedBackgroundImage = [[self imageInBundlePathForImageName:@"VoiceBtn_BlackHL"] resizableImageWithCapInsets:edgeInsets resizingMode:UIImageResizingModeStretch];
-//        [_voiceRecordButton setBackgroundImage:voiceRecordButtonNormalBackgroundImage forState:UIControlStateNormal];
-//        [_voiceRecordButton setBackgroundImage:voiceRecordButtonHighlightedBackgroundImage forState:UIControlStateHighlighted];
-//        _voiceRecordButton.titleLabel.font = [UIFont systemFontOfSize:14.0f];
-//        [_voiceRecordButton setTitle:@"按住 说话" forState:UIControlStateNormal];
-//        [_voiceRecordButton setTitle:@"松开 结束" forState:UIControlStateHighlighted];
-//        [_voiceRecordButton addTarget:self action:@selector(startRecordVoice) forControlEvents:UIControlEventTouchDown];
-//        [_voiceRecordButton addTarget:self action:@selector(cancelRecordVoice) forControlEvents:UIControlEventTouchUpOutside];
-//        [_voiceRecordButton addTarget:self action:@selector(confirmRecordVoice) forControlEvents:UIControlEventTouchUpInside];
-//        [_voiceRecordButton addTarget:self action:@selector(updateCancelRecordVoice) forControlEvents:UIControlEventTouchDragExit];
-//        [_voiceRecordButton addTarget:self action:@selector(updateContinueRecordVoice) forControlEvents:UIControlEventTouchDragEnter];
     }
     return _voiceRecordButton;
 }
