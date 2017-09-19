@@ -361,7 +361,7 @@
 
 //录音结束
 - (void)confirmRecordVoice {
-    self.recordLbl.text = @"按住进行录制";
+    self.recordLbl.text = @"长按进行录制";
     self.recordButton.layer.borderWidth = 2;
     [self.MP3 stopRecord];
 }
@@ -380,6 +380,7 @@
     
     if (_mp3Path.length > 0 && _secondCount > 0) {
         [self endHeartbeatPacket];
+        [self switchToVoiceVoice:NO];
         if (self.delegate && [self.delegate respondsToSelector:@selector(voiceViewSendVoiceMessage:seconds:)]) {
             [self.delegate voiceViewSendVoiceMessage:_mp3Path seconds:_secondCount];
         }

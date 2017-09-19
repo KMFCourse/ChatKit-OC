@@ -260,17 +260,13 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
         case LCCKFunctionViewShowNothing: {
             shouldScrollToBottom = NO;
             shouldCacheText = YES;
-        }
-            break;
+        } break;
         case LCCKFunctionViewShowFace:
         case LCCKFunctionViewShowMore:
+        case LCCKFunctionViewShowVoice:
         case LCCKFunctionViewShowKeyboard: {
             shouldCacheText = YES;
-        }
-            break;
-        case LCCKFunctionViewShowVoice:
-            shouldCacheText = NO;
-            break;
+        } break;
     }
     [self updateChatBarConstraintsIfNeededShouldCacheText:shouldCacheText];
     [self chatBarFrameDidChangeShouldScrollToBottom:shouldScrollToBottom];
@@ -338,6 +334,7 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 #pragma mark - LCCKChatVoiceViewDelegate
 
 - (void)voiceViewSendVoiceMessage:(NSString *)mp3Path seconds:(NSTimeInterval)second {
+    [self showVoiceView:NO];
     [self sendVoiceMessage:mp3Path seconds:second];
 }
 
@@ -373,9 +370,6 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 }
 
 - (void)endInputing {
-    if (self.voiceButton.selected) {
-        return;
-    }
     self.faceButton.selected = self.moreButton.selected = self.voiceButton.selected = NO;
     self.showType = LCCKFunctionViewShowNothing;
 }

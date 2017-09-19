@@ -95,6 +95,7 @@
         _messageTextLabel = [[MLLinkLabel alloc] init];
         _messageTextLabel.font = [LCCKSettingService sharedInstance].defaultThemeTextMessageFont;
         _messageTextLabel.numberOfLines = 0;
+        _messageTextLabel.dataDetectorTypes = MLDataDetectorTypeNone;
         _messageTextLabel.lineBreakMode = NSLineBreakByWordWrapping;
         __weak __typeof(self) weakSelf = self;
         [_messageTextLabel setDidClickLinkBlock:^(MLLink *link, NSString *linkText, MLLinkLabel *label) {
