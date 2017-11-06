@@ -276,9 +276,10 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     [self textViewDidChange:self.textView shouldCacheText:shouldCacheText];
 }
 
-- (void)updateChatBarKeyBoardConstraints {
+- (void)updateChatBarKeyBoardConstraints:(BOOL)willHide {
+    CGFloat bottomConstant = willHide ? (0-LCCK_Reset_BOTTOMBar_HEIGHT(0)) : (-self.keyboardSize.height);
     [self mas_updateConstraints:^(MASConstraintMaker *make) {
-        make.bottom.mas_equalTo(-self.keyboardSize.height);
+        make.bottom.mas_equalTo(bottomConstant);
     }];
     [UIView animateWithDuration:LCCKAnimateDuration animations:^{
         [self layoutIfNeeded];
@@ -428,7 +429,7 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
     if (_showType == LCCKFunctionViewShowKeyboard) {
         _showType = LCCKFunctionViewShowNothing;
     }
-    [self updateChatBarKeyBoardConstraints];
+    [self updateChatBarKeyBoardConstraints:YES];
     [self updateChatBarConstraintsIfNeeded];
 }
 
@@ -449,7 +450,7 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
         return;
     }
     self.allowTextViewContentOffset = YES;
-    [self updateChatBarKeyBoardConstraints];
+    [self updateChatBarKeyBoardConstraints:NO];
     self.showType = LCCKFunctionViewShowKeyboard;
 }
 

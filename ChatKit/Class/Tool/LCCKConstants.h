@@ -44,6 +44,12 @@ typedef void (^LCCKProgressBlock)(NSInteger percentDone);
 
 static NSString *const LCCKBadgeTextForNumberGreaterThanLimit = @"···";
 
+// 是否iPhoneX
+#define LCCK_iPhoneX  ([UIScreen mainScreen].bounds.size.width == 375 && [UIScreen mainScreen].bounds.size.height == 812)
+
+// 统一处理工具栏
+#define LCCK_Reset_BOTTOMBar_HEIGHT(x) (LCCK_iPhoneX ? ((x) + 34) : (x))
+
 #define LCCK_DEPRECATED(explain) __attribute__((deprecated(explain)))
 
 #ifndef LCCKLocalizedStrings

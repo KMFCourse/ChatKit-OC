@@ -10,6 +10,7 @@
 #import "LCCKCellRegisterController.h"
 #import "LCCKChatBar.h"
 #import "LCCKConversationRefreshHeader.h"
+#import "LCCKConstants.h"
 
 #if __has_include(<CYLDeallocBlockExecutor/CYLDeallocBlockExecutor.h>)
 #import <CYLDeallocBlockExecutor/CYLDeallocBlockExecutor.h>
@@ -44,8 +45,11 @@ static CGFloat const LCCKScrollViewInsetTop = 20.f;
         make.top.and.left.and.width.equalTo(self.view);
         make.bottom.equalTo(self.chatBar.mas_top);
     }];
+    
+    CGFloat bottomConstant = 0-LCCK_Reset_BOTTOMBar_HEIGHT(0);
     [self.chatBar mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.and.right.and.bottom.equalTo(self.view);
+        make.left.and.right.equalTo(self.view);
+        make.bottom.equalTo(self.view).offset(bottomConstant);
         make.height.mas_greaterThanOrEqualTo(@(kLCCKChatBarMinHeight));
     }];
 }

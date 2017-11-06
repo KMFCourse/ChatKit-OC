@@ -94,7 +94,7 @@ NSString *const kLCCKAudioDataKey;
     }
     
     //如果来自同一个URLString并且index相同,则直接取消
-    if ([self.URLString isEqualToString:URLString] && self.identifier == identifier) {
+    if ([self.URLString isEqualToString:URLString] && [self.identifier isEqualToString:identifier]) {
         [self stopAudioPlayer];
         [self setAudioPlayerState:LCCKVoiceMessageStateCancel];
         return;
