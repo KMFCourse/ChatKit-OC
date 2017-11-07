@@ -30,9 +30,12 @@
 
 #define kLCCKTopLineBackgroundColor  [UIColor colorWithRed:219/255.0 green:219/255.0 blue:219/255.0 alpha:1.0f]
 
+static NSInteger const kVoiceRecordTimerCount = 60;
+
 @interface LCCKChatVoiceView ()<Mp3RecorderDelegate>
 {
     dispatch_source_t _timer;
+    dispatch_source_t _recordTimer;
 }
 
 @property (strong, nonatomic) Mp3Recorder *MP3;
@@ -200,7 +203,7 @@
 - (UILabel *)recordLbl {
     if (!_recordLbl) {
         _recordLbl = [[UILabel alloc] init];
-        _recordLbl.text = @"按住开始录制";
+        _recordLbl.text = @"点击开始录制";
         _recordLbl.font = [UIFont systemFontOfSize:16.f];
         _recordLbl.textColor = kLCCKHexRGB(0xA5A5A5);
         _recordLbl.textAlignment = NSTextAlignmentCenter;
@@ -214,15 +217,15 @@
         _recordButton.layer.masksToBounds = YES;
         _recordButton.layer.cornerRadius = _recordButton.frame.size.width/2;
         _recordButton.layer.borderColor = kLCCKHexRGB(0xDBDBDB).CGColor;
-        _recordButton.layer.borderWidth = 2;
+        _recordButton.layer.borderWidth = 5;
+        
         [_recordButton setBackgroundImage:[UIImage lcck_imageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+        [_recordButton setBackgroundImage:[UIImage lcck_imageWithColor:kLCCKHexRGB(0x3EA0F3)] forState:UIControlStateSelected];
         [_recordButton setBackgroundImage:[UIImage lcck_imageWithColor:kLCCKHexRGB(0x3EA0F3)] forState:UIControlStateHighlighted];
         [_recordButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_start"] forState:UIControlStateNormal];
+        [_recordButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_starting"] forState:UIControlStateSelected];
         [_recordButton setImage:[self imageInBundlePathForImageName:@"conversation_icon_starting"] forState:UIControlStateHighlighted];
-        
-        [_recordButton addTarget:self action:@selector(startRecordVoice) forControlEvents:UIControlEventTouchDown];
-        [_recordButton addTarget:self action:@selector(cancelRecordVoice) forControlEvents:UIControlEventTouchUpOutside];
-        [_recordButton addTarget:self action:@selector(confirmRecordVoice) forControlEvents:UIControlEventTouchUpInside];
+        [_recordButton addTarget:self action:@selector(recordVoicerBtnAction:) forControlEvents:UIControlEventTouchUpInside];
     }
     return _recordButton;
 }
@@ -340,11 +343,20 @@
 }
 
 #pragma mark - Action
+- (void)recordVoicerBtnAction:(UIButton *)sender
+{
+    if (sender.selected)
+        [self stopRecordVoice];
+    else
+        [self startRecordVoice];
+    sender.selected = !sender.selected;
+}
+
 //开始录音
 - (void)startRecordVoice {
     // 判断权限
     if ([self judgeAVAudioSession]) {
-        self.recordLbl.text = @"松开完成录制";
+        self.recordLbl.text = @"再次点击结束录音";
         self.recordButton.layer.borderWidth = 0;
         self.recordButton.highlighted = YES;
         [self.MP3 startRecord];
@@ -353,16 +365,10 @@
     }
 }
 
-//取消录音
-- (void)cancelRecordVoice {
-    self.recordButton.highlighted = NO;
-    [self.MP3 cancelRecord];
-}
-
 //录音结束
-- (void)confirmRecordVoice {
-    self.recordLbl.text = @"长按进行录制";
-    self.recordButton.layer.borderWidth = 2;
+- (void)stopRecordVoice {
+    self.recordLbl.text = @"点击开始录音";
+    self.recordButton.layer.borderWidth = 5;
     [self.MP3 stopRecord];
 }
 
