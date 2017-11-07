@@ -11,6 +11,7 @@
 #import "UIImage+LCCKExtension.h"
 #import "LCCKAVAudioPlayer.h"
 #import "Mp3Recorder.h"
+#import "LCCKGradientProgressView.h"
 
 #if __has_include(<DACircularProgressView.h>)
 #import <DACircularProgressView.h>
@@ -45,6 +46,8 @@ static NSInteger const kVoiceRecordTimerCount = 60;
 @property (strong, nonatomic) UIView *recordView;//录音界面
 @property (strong, nonatomic) UIButton *recordButton;
 @property (strong, nonatomic) UILabel *recordLbl;
+@property (strong, nonatomic) UIView *recordBtnBaseView;
+@property (strong, nonatomic) LCCKGradientProgressView * lineProgressView;
 
 @property (strong, nonatomic) UIView *voiceView;//试听界面
 @property (strong, nonatomic) UIButton *voiceButton;
@@ -54,6 +57,7 @@ static NSInteger const kVoiceRecordTimerCount = 60;
 @property (strong, nonatomic) UIView *bottomView;
 @property (strong, nonatomic) UIButton *sendButton;
 @property (strong, nonatomic) UIButton *cancleButton;
+@property (assign, nonatomic) BOOL isFinish;
 
 @end
 
@@ -83,6 +87,7 @@ static NSInteger const kVoiceRecordTimerCount = 60;
     
     [self.recordView addSubview:self.recordLbl];
     [self.recordView addSubview:self.recordButton];
+    [self.recordView addSubview:self.lineProgressView];
     
     [self.voiceView addSubview:self.voiceLbl];
     [self.voiceView addSubview:self.voiceButton];
@@ -131,7 +136,7 @@ static NSInteger const kVoiceRecordTimerCount = 60;
     
     [self.progressView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerX.and.centerY.mas_equalTo(self.voiceButton);
-        make.width.height.mas_equalTo(self.voiceButton).offset(5);
+        make.width.height.mas_equalTo(self.voiceButton).offset(10);
     }];
     
     [self.bottomView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -189,6 +194,16 @@ static NSInteger const kVoiceRecordTimerCount = 60;
     }];
 }
 
+- (LCCKGradientProgressView *)lineProgressView {
+    if (!_lineProgressView) {
+        _lineProgressView = [[LCCKGradientProgressView alloc] initWithFrame:CGRectMake(0, 0.5, [UIScreen mainScreen].bounds.size.width, 2)];
+        _lineProgressView.bgProgressColor = [UIColor clearColor];
+        _lineProgressView.colorArr = @[(id)kLCCKHexRGB(0x2BA2F2).CGColor,(id)kLCCKHexRGB(0x2BA2F2).CGColor];
+        _lineProgressView.progress = 0.0;
+    }
+    return _lineProgressView;
+}
+
 // 录音界面
 - (UIView *)recordView {
     if (!_recordView) {
@@ -228,6 +243,17 @@ static NSInteger const kVoiceRecordTimerCount = 60;
         [_recordButton addTarget:self action:@selector(recordVoicerBtnAction:) forControlEvents:UIControlEventTouchUpInside];
     }
     return _recordButton;
+}
+
+- (UIView *)recordBtnBaseView {
+    if (!_recordBtnBaseView) {
+        _recordBtnBaseView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 150, 150)];
+        _recordBtnBaseView.center = self.recordButton.center;
+        _recordBtnBaseView.backgroundColor = [UIColor whiteColor];
+        [self.recordView addSubview:_recordBtnBaseView];
+        [self.recordView sendSubviewToBack:_recordBtnBaseView];
+    }
+    return _recordBtnBaseView;
 }
 
 // 播放界面
@@ -308,10 +334,97 @@ static NSInteger const kVoiceRecordTimerCount = 60;
     return _sendButton;
 }
 
+#pragma mark - RecordWaveAnimation
+
+- (void)addRecordWaveAnimationLayer
+{
+    CAShapeLayer *pulseLayer = [CAShapeLayer layer];
+    pulseLayer.frame = self.recordBtnBaseView.layer.bounds;
+    pulseLayer.path = [UIBezierPath bezierPathWithOvalInRect:pulseLayer.bounds].CGPath;
+    pulseLayer.fillColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1/1.0].CGColor;//填充色
+    pulseLayer.opacity = 0.0;
+    
+    //可以复制layer
+    CAReplicatorLayer *replicatorLayer = [CAReplicatorLayer layer];
+    replicatorLayer.frame = self.recordBtnBaseView.bounds;
+    replicatorLayer.instanceCount = 4;//创建副本的数量,包括源对象。
+    replicatorLayer.instanceDelay = 1;//复制副本之间的延迟
+    [replicatorLayer addSublayer:pulseLayer];
+    
+    [self.recordBtnBaseView.layer addSublayer:replicatorLayer];
+    
+    CABasicAnimation *opacityAnima = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    opacityAnima.fromValue = @(0.3);
+    opacityAnima.toValue = @(0.0);
+    
+    CABasicAnimation *scaleAnima = [CABasicAnimation animationWithKeyPath:@"transform"];
+    scaleAnima.fromValue = [NSValue valueWithCATransform3D:CATransform3DScale(CATransform3DIdentity, 0.0, 0.0, 0.0)];
+    scaleAnima.toValue = [NSValue valueWithCATransform3D:CATransform3DScale(CATransform3DIdentity, 1.0, 1.0, 0.0)];
+    
+    CAAnimationGroup *groupAnima = [CAAnimationGroup animation];
+    groupAnima.animations = @[opacityAnima, scaleAnima];
+    groupAnima.duration = 4.0;
+    groupAnima.autoreverses = NO;
+    groupAnima.repeatCount = MAXFLOAT;
+    [pulseLayer addAnimation:groupAnima forKey:@"groupAnimation"];
+}
+
+- (void)removeRecordWaveAnimationLayer
+{
+    [self.recordBtnBaseView removeFromSuperview];
+    self.recordBtnBaseView = nil;
+}
+
+#pragma mark - LineProgressViewAnimation
+
+// 倒计时开始
+- (void)startRecordTimer
+{
+    __block NSInteger count = 0;
+    __block CGFloat persent = 1.0/kVoiceRecordTimerCount;
+    
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    _recordTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,queue);
+    dispatch_source_set_timer(_recordTimer, dispatch_walltime(NULL, 0), 1 * NSEC_PER_SEC, 0);
+    dispatch_source_set_event_handler(_recordTimer, ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            if (count < kVoiceRecordTimerCount) {
+                count++;
+            } else {
+                [self appRecieveMsgFromRecordTimer];
+            }
+            self.lineProgressView.progress = MIN(1, MAX(0, count * persent));
+        });
+    });
+    dispatch_resume(_recordTimer);
+}
+
+// 倒计时结束
+- (void)endRecordTimer
+{
+    if (_recordTimer) {
+        dispatch_source_cancel(_recordTimer);
+    }
+}
+
+// 倒计时结束 完成当前的录音
+- (void)appRecieveMsgFromRecordTimer
+{
+    [self endRecordTimer];
+    if (self.recordButton.highlighted == YES) {
+        self.recordButton.selected = NO;
+        self.recordButton.highlighted = NO;
+        self.isFinish = YES;
+        [self.MP3 stopRecord];
+    }
+}
+
 #pragma mark - Mp3RecorderDelegate
 
 - (void)endConvertWithMP3FileName:(NSString *)fileName {
     if (fileName) {
+        self.lineProgressView.progress = 0.0;
         [self reloadVoiceTitle:fileName];
         [self switchToVoiceVoice:YES];
     }
@@ -356,9 +469,12 @@ static NSInteger const kVoiceRecordTimerCount = 60;
 - (void)startRecordVoice {
     // 判断权限
     if ([self judgeAVAudioSession]) {
+        [self startRecordTimer];
+        [self addRecordWaveAnimationLayer];
         self.recordLbl.text = @"再次点击结束录音";
         self.recordButton.layer.borderWidth = 0;
         self.recordButton.highlighted = YES;
+        self.isFinish = NO;
         [self.MP3 startRecord];
     } else {
         [[NSNotificationCenter defaultCenter] postNotificationName:LCCKNotificationRecordNoPower object:nil];
@@ -369,7 +485,13 @@ static NSInteger const kVoiceRecordTimerCount = 60;
 - (void)stopRecordVoice {
     self.recordLbl.text = @"点击开始录音";
     self.recordButton.layer.borderWidth = 5;
-    [self.MP3 stopRecord];
+    if (self.isFinish == NO) {
+        [self.MP3 stopRecord];
+    } else {
+        self.isFinish = NO;
+    }
+    [self endRecordTimer];
+    [self removeRecordWaveAnimationLayer];
 }
 
 - (void)switchToVoiceVoice:(BOOL)isShow {
