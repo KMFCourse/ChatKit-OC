@@ -18,4 +18,6 @@
 
 @property (weak, nonatomic) id<LCCKChatVoiceViewDelegate> delegate;
 
+- (void)userWillHideVoiceRecordView;
+
 @end

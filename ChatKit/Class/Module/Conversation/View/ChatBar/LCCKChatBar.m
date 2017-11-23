@@ -335,8 +335,8 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
 #pragma mark - LCCKChatVoiceViewDelegate
 
 - (void)voiceViewSendVoiceMessage:(NSString *)mp3Path seconds:(NSTimeInterval)second {
-    [self showVoiceView:NO];
     [self sendVoiceMessage:mp3Path seconds:second];
+    self.showType = LCCKFunctionViewShowVoice;
 }
 
 #pragma mark - LCCKChatFaceViewDelegate
@@ -630,8 +630,7 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
         }];
     } else if (self.moreView.superview) {
         self.voiceView.hidden = YES;
-        
-        [self.voiceView dismiss];
+        [self.voiceView userWillHideVoiceRecordView];
         [self.voiceView mas_remakeConstraints:^(MASConstraintMaker *make) {
             make.width.and.left.mas_equalTo(self);
             make.height.mas_equalTo(kFunctionViewHeight);
