@@ -630,6 +630,8 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
         }];
     } else if (self.moreView.superview) {
         self.voiceView.hidden = YES;
+        
+        [self.voiceView dismiss];
         [self.voiceView mas_remakeConstraints:^(MASConstraintMaker *make) {
             make.width.and.left.mas_equalTo(self);
             make.height.mas_equalTo(kFunctionViewHeight);

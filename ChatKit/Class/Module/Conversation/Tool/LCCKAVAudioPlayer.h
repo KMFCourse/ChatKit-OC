@@ -34,8 +34,9 @@
 
 - (void)playAudioWithURLString:(NSString *)URLString identifier:(NSString *)identifier;
 
+- (void)pauseAudioPlayer;
+- (void)resumeAudioPlayer;
 - (void)stopAudioPlayer;
-
 - (void)cleanAudioCache;
 
 @end

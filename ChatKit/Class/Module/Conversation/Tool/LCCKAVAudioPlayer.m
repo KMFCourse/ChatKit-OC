@@ -94,7 +94,7 @@ NSString *const kLCCKAudioDataKey;
     }
     
     //如果来自同一个URLString并且index相同,则直接取消
-    if ([self.URLString isEqualToString:URLString] && [self.identifier isEqualToString:identifier]) {
+    if (_audioPlayer.playing && [self.URLString isEqualToString:URLString] && [self.identifier isEqualToString:identifier]) {
         [self stopAudioPlayer];
         [self setAudioPlayerState:LCCKVoiceMessageStateCancel];
         return;
@@ -139,9 +139,19 @@ NSString *const kLCCKAudioDataKey;
     }
 }
 
+- (void)pauseAudioPlayer {
+    if (_audioPlayer) {
+        _audioPlayer.playing ? [_audioPlayer pause] : nil;
+    }
+}
+
+- (void)resumeAudioPlayer {
+    if (_audioPlayer) {
+        _audioPlayer.playing ? nil : [_audioPlayer play];
+    }
+}
 
 #pragma mark - Private Methods
-
 - (NSData *)audioDataFromURLString:(NSString *)URLString identifier:(NSString *)identifier {
     NSData *audioData;
     
