@@ -9,7 +9,7 @@ PODS:
     - AVOSCloudIM/_NOARC (= 8.0.4)
   - AVOSCloudIM/_NOARC (8.0.4):
     - AVOSCloud (= 8.0.4)
-  - ChatKit (2.0.0):
+  - ChatKit (2.0.1):
     - AVOSCloud (~> 8.0.4)
     - AVOSCloudIM (~> 8.0.4)
     - CYLDeallocBlockExecutor (~> 1.1.2)
@@ -67,7 +67,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AVOSCloud: 645f20b77cdcc0622a45c663c1a5735a17d1df27
   AVOSCloudIM: 182e93f9e6e3ad165c6fd67d8c01d15f561a7538
-  ChatKit: 5c1e12b04919974ed4eeb7455d45861d99212390
+  ChatKit: ce9cb2a87081f333538077064d3e4efa743a87c2
   CYLDeallocBlockExecutor: ecf39e45dcead9e120f460df5668b8f5093d178e
   CYLTabBarController: 8d99fccf22866fe18c978c5ff863dc6051da45ff
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
@@ -88,6 +88,6 @@ SPEC CHECKSUMS:
   TWMessageBarManager: fd84e7948ba7968a2b5d9454859135761214ec56
   UITableView+FDTemplateLayoutCell: 5c949b4a5059c404b442926c0e80f81d10a2d66f
 
-PODFILE CHECKSUM: 0c9077ef2ff9a92e0adcca86bcabd425df220379
+PODFILE CHECKSUM: 94bb4d51fc8c2a88863faeb030169b399bf3022b
 
-COCOAPODS: 1.3.1
+COCOAPODS: 1.2.0
