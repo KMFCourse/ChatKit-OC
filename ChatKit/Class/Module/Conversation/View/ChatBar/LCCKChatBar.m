@@ -542,6 +542,7 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
         [self.moreButton setSelected:!self.moreButton.selected];
         [self.voiceButton setSelected:NO];
     } else if (button == self.voiceButton){
+        [self destroyAVAudioPlayer];
         [self.faceButton setSelected:NO];
         [self.moreButton setSelected:NO];
         [self.voiceButton setSelected:!self.voiceButton.selected];
@@ -551,6 +552,12 @@ NSString *const kLCCKBatchDeleteTextSuffix = @"kLCCKBatchDeleteTextSuffix";
         [self beginInputing];
     }
     self.showType = showType;
+}
+
+- (void)destroyAVAudioPlayer {
+    [[LCCKAVAudioPlayer sharePlayer] stopAudioPlayer];
+    [LCCKAVAudioPlayer sharePlayer].identifier = nil;
+    [LCCKAVAudioPlayer sharePlayer].URLString = nil;
 }
 
 - (void)showFaceView:(BOOL)show {

@@ -399,8 +399,12 @@ static NSInteger const kVoiceRecordTimerCount = 60;
 
 //语音播放-取消方法
 - (void)userWillCancleMethod {
-    self.voiceButton.selected = NO;
-    [[LCCKAVAudioPlayer sharePlayer] stopAudioPlayer];
+    if (_voiceButton.selected == YES) {
+        [self userTouchVoiceButton:_voiceButton];
+    }
+    if (_voiceButton.selected == NO && _secondNumber > 0 && _progressView.progress < 1) {
+        [self resumeVoiceTimer];
+    }
     [self endVoiceTimer];
     [self switchToVoiceVoice:NO];
 }
@@ -413,8 +417,12 @@ static NSInteger const kVoiceRecordTimerCount = 60;
 //语音播放-发送方法
 - (void)userWillSendMethod {
     if (_mp3Path.length > 0 && _secondCount > 0) {
-        self.voiceButton.selected = NO;
-        [[LCCKAVAudioPlayer sharePlayer] stopAudioPlayer];
+        if (_voiceButton.selected == YES) {
+            [self userTouchVoiceButton:_voiceButton];
+        }
+        if (_voiceButton.selected == NO && _secondNumber > 0 && _progressView.progress < 1) {
+            [self resumeVoiceTimer];
+        }
         [self endVoiceTimer];
         [self switchToVoiceVoice:NO];
         
@@ -435,7 +443,6 @@ static NSInteger const kVoiceRecordTimerCount = 60;
                 [[LCCKAVAudioPlayer sharePlayer] playAudioWithURLString:self.mp3Path identifier:@"EHVoiceRecordView"];
                 [self startVoiceTimer];
             }
-            
         } else {
             [self pauseVoiceTimer];
             [[LCCKAVAudioPlayer sharePlayer] pauseAudioPlayer];
@@ -504,9 +511,8 @@ static NSInteger const kVoiceRecordTimerCount = 60;
 // 当前界面为播放时 消失
 - (void)dismissCurrentViewWhenVoice
 {
-    if (self.voiceButton.selected == YES) {
-        [self endVoiceTimer];
-        [self userTouchVoiceButton:self.voiceButton];
+    if (_voiceButton.selected == YES) {
+        [self userTouchVoiceButton:_voiceButton];
     }
 }
 
