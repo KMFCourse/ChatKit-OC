@@ -636,9 +636,7 @@ setLoadLatestMessagesHandler:^(LCCKConversationViewController *conversationContr
 }
 
 + (void)lcck_exampleChangeGroupAvatarURLsForConversationId:(NSString *)conversationId
-                                              shouldInsert:(BOOL)shouldInsert 
-{
-}
+                                              shouldInsert:(BOOL)shouldInsert {}
 
 /**
  *  自定义会话的菜单

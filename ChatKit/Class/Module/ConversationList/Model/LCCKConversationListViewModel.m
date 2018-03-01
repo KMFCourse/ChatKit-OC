@@ -121,7 +121,6 @@
         }
     }
 
-    
     LCCKConfigureCellBlock configureCellBlock = [[LCCKConversationListService sharedInstance] configureCellBlock];
     
     BOOL impDelegate = [self.conversationListViewController.delegate respondsToSelector:@selector(conversation:cell:tableView:cellForRowAtIndexPath:)];
@@ -129,15 +128,11 @@
     // Delegate 与 Block 两种方式不能同时实现
     if (configureCellBlock && impDelegate) {
         [NSException raise:NSInternalInconsistencyException format:@"Block or Delegate choose one."];
-    }
-    // 调用 Delegate
-    else if (impDelegate){
-        
+    } else if (impDelegate) {
+        // 调用 Delegate
         [self.conversationListViewController.delegate conversation:conversation cell:cell tableView:tableView cellForRowAtIndexPath:indexPath];
-
-    }
-    // 调用 Block
-    else if (configureCellBlock){
+    } else if (configureCellBlock) {
+        // 调用 Block
         configureCellBlock(cell, tableView, indexPath, conversation);
     }
     
@@ -220,16 +215,11 @@
     // Delegate 与 Block 两种方式不能同时实现
     if (didSelectBlock && impDelegate) {
         [NSException raise:NSInternalInconsistencyException format:@"Block or Delegate choose one."];
-        
-    }
-    // 调用 Delegate
-    else if (impDelegate){
-        
+    } else if (impDelegate) {
+        // 调用 Delegate
         [self.conversationListViewController.delegate conversation:conversation tableView:tableView didSelectRowAtIndexPath:indexPath];
-        
-    }
-    // 调用 Block
-    else if (didSelectBlock){
+    } else if (didSelectBlock) {
+        // 调用 Block
         !didSelectBlock ?: [LCCKConversationListService sharedInstance].didSelectConversationsListCellBlock(indexPath, conversation, self.conversationListViewController);
     }
 }
