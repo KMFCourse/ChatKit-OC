@@ -3,7 +3,6 @@ target 'ChatKit-OC' do
   inhibit_all_warnings!
   
   pod 'ChatKit', :path => '../'
-  
   pod 'CYLTabBarController', '1.9.0'
   pod 'TWMessageBarManager', '1.8.1'
   pod 'MLPAutoCompleteTextField', '1.5'
