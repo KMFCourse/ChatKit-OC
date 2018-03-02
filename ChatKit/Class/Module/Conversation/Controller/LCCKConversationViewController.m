@@ -244,7 +244,8 @@ NSString *const LCCKConversationViewControllerErrorDomain = @"LCCKConversationVi
     [self.chatBar open];
     [self saveCurrentConversationInfoIfExists];
     
-    [self setupNavigationItemTitleWithConversation:self.conversation];
+    //YC:屏蔽方法
+//    [self setupNavigationItemTitleWithConversation:self.conversation];
     
     !self.viewDidAppearBlock ?: self.viewDidAppearBlock(self, animated);
 }
